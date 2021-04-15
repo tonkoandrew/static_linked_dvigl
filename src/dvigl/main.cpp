@@ -854,7 +854,7 @@ namespace entry
 				((char*)data)[size] = '\0';
 
 				if (SDL_GameControllerAddMapping( (char*)data) < 0) {
-					DBG("SDL game controller add mapping failed: {}", SDL_GetError());
+					spdlog::debug("SDL game controller add mapping failed: {}", SDL_GetError());
 				}
 
 				BX_FREE(allocator, data);

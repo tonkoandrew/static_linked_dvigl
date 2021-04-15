@@ -6,7 +6,6 @@
 #ifndef ENTRY_H_HEADER_GUARD
 #define ENTRY_H_HEADER_GUARD
 
-#include "dbg.h"
 #include <bx/bx.h>
 #include <bx/filepath.h>
 #include <bx/string.h>

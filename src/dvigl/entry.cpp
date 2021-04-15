@@ -15,6 +15,8 @@
 #endif // BX_PLATFORM_EMSCRIPTEN
 
 #include "entry_p.h"
+#include "spdlog/spdlog.h"
+
 
 extern "C" int32_t _main_(int32_t _argc, char** _argv);
 
@@ -413,7 +415,7 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 
 	int main(int _argc, const char* const* _argv)
 	{
-		//DBG(BX_COMPILER_NAME " / " BX_CPU_NAME " / " BX_ARCH_NAME " / " BX_PLATFORM_NAME);
+		spdlog::info(BX_COMPILER_NAME " / " BX_CPU_NAME " / " BX_ARCH_NAME " / " BX_PLATFORM_NAME);
 
 		s_fileReader = BX_NEW(g_allocator, FileReader);
 		s_fileWriter = BX_NEW(g_allocator, FileWriter);
@@ -506,7 +508,7 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 				case Event::DropFile:
 					{
 						const DropFileEvent* drop = static_cast<const DropFileEvent*>(ev);
-						DBG("%s", drop->m_filePath.getCPtr() );
+						spdlog::debug("%s", drop->m_filePath.getCPtr() );
 					}
 					break;
 
