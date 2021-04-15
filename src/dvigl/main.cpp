@@ -1,10 +1,3 @@
-/*
- * Copyright 2011-2021 Branimir Karadzic. All rights reserved.
- * License: https://github.com/bkaradzic/bgfx#license-bsd-2-clause
- */
-
-#define ENTRY_CONFIG_IMPLEMENT_MAIN 1
-
 #include "entry_p.h"
 
 
@@ -856,14 +849,6 @@ namespace entry
 								uint8_t modifiers = translateKeyModifiers(kev.keysym.mod);
 								Key::Enum key = translateKey(kev.keysym.scancode);
 
-#if 0
-								DBG("SDL scancode %d, key %d, name %s, key name %s"
-									, kev.keysym.scancode
-									, key
-									, SDL_GetScancodeName(kev.keysym.scancode)
-									, SDL_GetKeyName(kev.keysym.scancode)
-									);
-#endif // 0
 
 								/// If you only press (e.g.) 'shift' and nothing else, then key == 'shift', modifier == 0.
 								/// Further along, pressing 'shift' + 'ctrl' would be: key == 'shift', modifier == 'ctrl.
@@ -1427,10 +1412,8 @@ namespace
 class ExampleHelloWorld : public entry::AppI
 {
 public:
-	ExampleHelloWorld(const char* _name, const char* _description, const char* _url)
-		: entry::AppI(_name, _description, _url)
-	{
-	}
+	ExampleHelloWorld()
+		: entry::AppI() {}
 
 	void init(int32_t _argc, const char* const* _argv, uint32_t _width, uint32_t _height) override
 	{
@@ -1439,7 +1422,7 @@ public:
 		m_reset  = BGFX_RESET_VSYNC;
 
 		bgfx::Init init;
-		init.type     = bgfx::RendererType::Vulkan;
+		init.type     = bgfx::RendererType::OpenGL;
 		// init.vendorId = args.m_pciId;
 		init.resolution.width  = m_width;
 		init.resolution.height = m_height;
@@ -1538,9 +1521,8 @@ switch (bgfx::getRendererType())
 
 } // namespace
 
-ENTRY_IMPLEMENT_MAIN(
-	  ExampleHelloWorld
-	, "00-helloworld"
-	, "Initialization and debug text."
-	, "https://bkaradzic.github.io/bgfx/examples.html#helloworld"
-	);
+int _main_(int _argc, char** _argv)
+{
+	ExampleHelloWorld app;
+	return entry::runApp(&app, _argc, _argv);
+}

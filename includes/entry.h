@@ -19,21 +19,6 @@ extern "C" int _main_(int _argc, char** _argv);
 #define ENTRY_WINDOW_FLAG_ASPECT_RATIO UINT32_C(0x00000001)
 #define ENTRY_WINDOW_FLAG_FRAME        UINT32_C(0x00000002)
 
-#ifndef ENTRY_CONFIG_IMPLEMENT_MAIN
-#	define ENTRY_CONFIG_IMPLEMENT_MAIN 0
-#endif // ENTRY_CONFIG_IMPLEMENT_MAIN
-
-#if ENTRY_CONFIG_IMPLEMENT_MAIN
-#define ENTRY_IMPLEMENT_MAIN(_app, ...)                 \
-	int _main_(int _argc, char** _argv)                 \
-	{                                                   \
-			_app app(__VA_ARGS__);                      \
-			return entry::runApp(&app, _argc, _argv);   \
-	}
-#else
-#define ENTRY_IMPLEMENT_MAIN(_app, ...) \
-	_app s_ ## _app ## App(__VA_ARGS__)
-#endif // ENTRY_CONFIG_IMPLEMENT_MAIN
 
 namespace entry
 {
@@ -282,7 +267,7 @@ namespace entry
 	{
 	public:
 		///
-		AppI(const char* _name, const char* _description, const char* _url = "https://bkaradzic.github.io/bgfx/index.html");
+		AppI();
 
 		///
 		virtual ~AppI() = 0;

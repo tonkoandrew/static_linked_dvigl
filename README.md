@@ -1,2 +1,2 @@
-# static_linked_dvigl
-static_linked_dvigl
+# dvigl - powerfully simple game engine
+

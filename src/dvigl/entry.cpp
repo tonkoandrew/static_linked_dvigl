@@ -443,11 +443,11 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 		return bx::kExitFailure;
 	}
 
-	AppI::AppI(const char* _name, const char* _description, const char* _url)
+	AppI::AppI()
 	{
-		m_name        = _name;
-		m_description = _description;
-		m_url         = _url;
+		m_name        = "_name";
+		m_description = "_description";
+		m_url         = "_url";
 		m_next        = s_apps;
 
 		s_apps = this;
