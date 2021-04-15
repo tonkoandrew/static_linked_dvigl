@@ -172,7 +172,7 @@ namespace entry
 
 	static void initTranslateKey(uint16_t _sdl, Key::Enum _key)
 	{
-		BX_ASSERT(_sdl < BX_COUNTOF(s_translateKey), "Out of bounds %d.", _sdl);
+		BX_ASSERT(_sdl < BX_COUNTOF(s_translateKey), "Out of bounds {}.", _sdl);
 		s_translateKey[_sdl&0xff] = (uint8_t)_key;
 	}
 
@@ -516,7 +516,7 @@ namespace entry
 
     if (result)
     {
-        spdlog::error("SDLNet_Init: %s", SDLNet_GetError());
+        spdlog::error("SDLNet_Init: {}", SDLNet_GetError());
         // return result;
     }
 
@@ -525,7 +525,7 @@ namespace entry
     result = IMG_Init(imgFlags);
     if (!(result & imgFlags))
     {
-        spdlog::error("SDL_image error: %s", IMG_GetError());
+        spdlog::error("SDL_image error: {}", IMG_GetError());
         // return result;
     }
 
@@ -565,30 +565,30 @@ namespace entry
     SDL_Surface* surf = IMG_Load("../res/textures/dirt_seamless.jpg");
     if (!surf)
     {
-        spdlog::error("IMG_Load error: %s", IMG_GetError());
+        spdlog::error("IMG_Load error: {}", IMG_GetError());
         // return 1;
     } else {
-	    spdlog::info("dirt_seamless %dx%d", surf->w, surf->h);
+	    spdlog::info("dirt_seamless {}x{}", surf->w, surf->h);
 	    SDL_FreeSurface(surf);
     }
 
     surf = IMG_Load("../res/textures/elvis_face.png");
     if (!surf)
     {
-        spdlog::error("IMG_Load error: %s", IMG_GetError());
+        spdlog::error("IMG_Load error: {}", IMG_GetError());
         // return 1;
     } else {
-    	spdlog::info("elvis_face %dx%d", surf->w, surf->h);
+    	spdlog::info("elvis_face {}x{}", surf->w, surf->h);
     	SDL_FreeSurface(surf);
     }
 
     surf = IMG_Load("../res/textures/round_grill.tga");
     if (!surf)
     {
-        spdlog::error("IMG_Load error: %s", IMG_GetError());
+        spdlog::error("IMG_Load error: {}", IMG_GetError());
         // return 1;
     } else {
-	    spdlog::info("round_grill %dx%d", surf->w, surf->h);
+	    spdlog::info("round_grill {}x{}", surf->w, surf->h);
     }
 
     SDL_Surface* converted = NULL;
@@ -597,7 +597,7 @@ namespace entry
 
     if (!converted)
     {
-        spdlog::error("SDL_ConvertSurface error: %s", SDL_GetError());
+        spdlog::error("SDL_ConvertSurface error: {}", SDL_GetError());
         // return 1;
     }
     // ========== sdl2 mixer ========================
@@ -610,7 +610,7 @@ namespace entry
     if (!(result & mixerFlags))
     {
         spdlog::error("Mix_Init: Failed to init required ogg and mod support!");
-        spdlog::error("Mix_Init: %s", Mix_GetError());
+        spdlog::error("Mix_Init: {}", Mix_GetError());
     }
 
     if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
@@ -629,22 +629,22 @@ namespace entry
     // ========== sdl2 ttf ========================
     if (TTF_Init() == -1)
     {
-    	spdlog::error("TTF_Init error: %s", TTF_GetError());
+    	spdlog::error("TTF_Init error: {}", TTF_GetError());
     	// return 1;
     }
     auto f = TTF_OpenFont("../res/fonts/SourceCodePro-Regular.ttf", 24);
     if (!f)
     {
-        spdlog::error("TTF_OpenFont error: %s", TTF_GetError());
+        spdlog::error("TTF_OpenFont error: {}", TTF_GetError());
     }
     SDL_Color color = {255, 255, 255};
     SDL_Surface* text_surf = TTF_RenderUTF8_Blended(f, "Hello world", color);
     if (!text_surf)
     {
-        spdlog::error("TTF_RenderUTF8_Blended error: %s", TTF_GetError());
+        spdlog::error("TTF_RenderUTF8_Blended error: {}", TTF_GetError());
         // return NULL;
     }
-    spdlog::info("Hello world text_surf %dx%d", text_surf->w, text_surf->h);
+    spdlog::info("Hello world text_surf {}x{}", text_surf->w, text_surf->h);
 
     TTF_CloseFont(f);
 	// ========================== EnTT and glm ================================
@@ -677,7 +677,7 @@ namespace entry
     for (auto entity: v)
     {
         auto [ttt, mmm] = v.get<TransformComponent, MeshComponent>(entity);
-        spdlog::info("Entity: %d, transform: %s, mesh_id: %d", (int) entity, glm::to_string(ttt.Transform).c_str(), mmm.mesh_id);
+        spdlog::info("Entity: {}, transform: {}, mesh_id: {}", (int) entity, glm::to_string(ttt.Transform).c_str(), (int) mmm.mesh_id);
     }
  //    // ============================= OZZ ==================================================
 
@@ -755,7 +755,7 @@ namespace entry
 				((char*)data)[size] = '\0';
 
 				if (SDL_GameControllerAddMapping( (char*)data) < 0) {
-					DBG("SDL game controller add mapping failed: %s", SDL_GetError());
+					DBG("SDL game controller add mapping failed: {}", SDL_GetError());
 				}
 
 				BX_FREE(allocator, data);
@@ -1433,26 +1433,35 @@ public:
 switch (bgfx::getRendererType())
 {
 	case (bgfx::RendererType::Direct3D9):
-		spdlog::info("Direct3D9");
+		spdlog::info("Renderer: Direct3D9");
 		break;
 	case (bgfx::RendererType::Direct3D11):
-		spdlog::info("Direct3D11");
+		spdlog::info("Renderer: Direct3D11");
 		break;
 	case (bgfx::RendererType::Direct3D12):
-		spdlog::info("Direct3D12");
+		spdlog::info("Renderer: Direct3D12");
 		break;
 	case (bgfx::RendererType::OpenGL):
-		spdlog::info("OpenGL");
+		spdlog::info("Renderer: OpenGL");
 		break;
 	case (bgfx::RendererType::Vulkan):
-		spdlog::info("Vulkan");
+		spdlog::info("Renderer: Vulkan");
 		break;
 	default:
 		break;
 }
-spdlog::error("test error %d", 42);
+spdlog::debug("test debug");
+spdlog::warn("test warning");
+spdlog::critical("test critical");
+spdlog::error("test error {}, {:.2f}", 42, 42.0f);
 
-		// Enable debug text.
+    spdlog::set_level(spdlog::level::warn); // Set global log level to debug
+    spdlog::debug("This message should not be displayed..");    
+    spdlog::set_level(spdlog::level::debug); // Set global log level to debug
+    spdlog::debug("This message should be displayed..");    
+
+
+
 		// bgfx::setDebug(m_debug);
 
 		// Set view 0 clear state.
