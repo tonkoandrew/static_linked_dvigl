@@ -1,4 +1,5 @@
 #include "spdlog/spdlog.h"
+#include <fmt/format.h>
 
 #include "entry_p.h"
 
@@ -78,46 +79,68 @@ BX_PRAGMA_DIAGNOSTIC_POP()
 #include "ozz/geometry/runtime/skinning_job.h"
 
 
+
+
+
+
+
+template <>
+struct fmt::formatter<tinystl::string>
+{
+	constexpr auto parse(format_parse_context& ctx)
+	{
+		auto it = ctx.begin(), end = ctx.end();
+		while (it != end)
+			*it++;
+		return it;
+	}
+	template <typename FormatContext> auto format(const tinystl::string& p, FormatContext& ctx)
+	{
+		return format_to(ctx.out(), "\"{}\"", p.c_str());
+	}
+};
+
+
 bool LoadSkeleton(const char* _filename, ozz::animation::Skeleton* _skeleton)
 {
-  assert(_filename && _skeleton);
-  spdlog::debug("Loading skeleton archive {}.", _filename);
-  ozz::io::File file(_filename, "rb");
-  if (!file.opened()) {
-	spdlog::error("Failed to open skeleton file {}.", _filename);
-    return false;
-  }
-  ozz::io::IArchive archive(&file);
-  if (!archive.TestTag<ozz::animation::Skeleton>()) {
-	spdlog::error("Failed to load skeleton instance from file {}.", _filename);
-    return false;
-  }
+	assert(_filename && _skeleton);
+	spdlog::debug("Loading skeleton archive {}.", _filename);
+	ozz::io::File file(_filename, "rb");
+	if (!file.opened()) {
+		spdlog::error("Failed to open skeleton file {}.", _filename);
+		return false;
+	}
+	ozz::io::IArchive archive(&file);
+	if (!archive.TestTag<ozz::animation::Skeleton>()) {
+		spdlog::error("Failed to load skeleton instance from file {}.", _filename);
+		return false;
+	}
 
-  // Once the tag is validated, reading cannot fail.
-  archive >> *_skeleton;
-
-  return true;
+	// Once the tag is validated, reading cannot fail.
+	archive >> *_skeleton;
+	return true;
 }
+
 
 bool LoadAnimation(const char* _filename,
                    ozz::animation::Animation* _animation)
 {
-  assert(_filename && _animation);
-  spdlog::debug("Loading animation archive: {}.", _filename);
-  ozz::io::File file(_filename, "rb");
-  if (!file.opened()) {
-    spdlog::error("Failed to open animation file {}.", _filename);
-    return false;
-  }
-  ozz::io::IArchive archive(&file);
-  if (!archive.TestTag<ozz::animation::Animation>()) {
-    spdlog::error("Failed to load animation instance from file {}.", _filename);
-    return false;
-  }
+	assert(_filename && _animation);
+	spdlog::debug("Loading animation archive: {}.", _filename);
+	ozz::io::File file(_filename, "rb");
+	if (!file.opened()) {
+		spdlog::error("Failed to open animation file {}.", _filename);
+		return false;
+	}
+	ozz::io::IArchive archive(&file);
+	if (!archive.TestTag<ozz::animation::Animation>()) {
+		spdlog::error("Failed to load animation instance from file {}.", _filename);
+		return false;
+	}
 
-  // Once the tag is validated, reading cannot fail.
-  archive >> *_animation;
-  return true;
+ 	// Once the tag is validated, reading cannot fail.
+  	archive >> *_animation;
+  	return true;
 }
 
 
@@ -753,9 +776,9 @@ namespace entry
     }
  //    // ============================= OZZ ==================================================
 
-	std::string skeleton = "../res/models/skeleton.ozz";
-	std::string animation = "../res/models/animation.ozz";
-	// std::string mesh = "../res/models/mesh.ozz";
+	tinystl::string skeleton = "../res/models/skeleton.ozz";
+	tinystl::string animation = "../res/models/animation.ozz";
+	// tinystl::string mesh = "../res/models/mesh.ozz";
 
 	ozz::animation::Skeleton m_skeleton;
 	ozz::animation::Animation m_animation;
@@ -766,6 +789,7 @@ namespace entry
     if (!LoadSkeleton(skeleton.c_str(), &m_skeleton)) {
     	spdlog::error("Failed to load skeleton {}", skeleton);
     }
+    spdlog::debug("Loaded skeleton from {}", skeleton);
 
     // Reading animation.
     if (!LoadAnimation(animation.c_str(), &m_animation)) {
@@ -1498,7 +1522,7 @@ public:
 		m_reset  = BGFX_RESET_VSYNC;
 
 		bgfx::Init init;
-		init.type     = bgfx::RendererType::OpenGL;
+		init.type     = bgfx::RendererType::Direct3D12;
 		// init.vendorId = args.m_pciId;
 		init.resolution.width  = m_width;
 		init.resolution.height = m_height;
@@ -1537,7 +1561,7 @@ switch (bgfx::getRendererType())
 
 
 
-		// bgfx::setDebug(m_debug);
+		bgfx::setDebug(m_debug);
 
 		// Set view 0 clear state.
 		bgfx::setViewClear(0
