@@ -151,9 +151,7 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 	{
 		entry::WindowHandle defaultWindow = { 0 };
 
-		char* title = "BGFX -> SDL Window";
-
-		entry::setWindowTitle(defaultWindow, title);
+		entry::setWindowTitle(defaultWindow, "BGFX -> SDL Window");
 		setWindowSize(defaultWindow, ENTRY_DEFAULT_WIDTH, ENTRY_DEFAULT_HEIGHT);
 
 		int32_t result = bx::kExitSuccess;

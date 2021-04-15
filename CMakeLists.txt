@@ -20,14 +20,14 @@ if(NOT CMAKE_BUILD_TYPE)
     )
 endif()
 
-if(WIN32)
-else()
-    set(OpenGL_GL_PREFERENCE GLVND
-        CACHE STRING
-        "Linux-only: if GLVND, use the vendor-neutral GL libraries (default)."
-    )
-    set_property(CACHE OpenGL_GL_PREFERENCE PROPERTY STRINGS GLVND LEGACY)
-endif()
+# if(WIN32)
+# else()
+#     set(OpenGL_GL_PREFERENCE GLVND
+#         CACHE STRING
+#         "Linux-only: if GLVND, use the vendor-neutral GL libraries (default)."
+#     )
+#     set_property(CACHE OpenGL_GL_PREFERENCE PROPERTY STRINGS GLVND LEGACY)
+# endif()
 
 # find_package(Threads REQUIRED)
 
@@ -49,9 +49,16 @@ find_package(ZLIB REQUIRED)
 set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
     ZLIB::ZLIB
 )
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
+    ZLIB::ZLIB
+)
 # ===================== SDL2 =============================================
 find_package(SDL2 CONFIG REQUIRED)
 set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
+    SDL2::SDL2main
+    SDL2::SDL2-static
+)
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
     SDL2::SDL2main
     SDL2::SDL2-static
 )
@@ -60,9 +67,12 @@ find_package(sdl2-net CONFIG REQUIRED)
 set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
     SDL2::SDL2_net
 )
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
+    SDL2::SDL2_net
+)
 # ===================== SDL2 image =======================================
 find_package(sdl2-image CONFIG REQUIRED)
-set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
     SDL2::SDL2_image
 )
 # ===================== SDL2 ttf =========================================
@@ -70,9 +80,15 @@ find_package(sdl2-ttf CONFIG REQUIRED)
 set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
     SDL2::SDL2_ttf
 )
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
+    SDL2::SDL2_ttf
+)
 # ===================== Vorbis ==============================================
 find_package(Vorbis CONFIG REQUIRED)
 set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
+    Vorbis::vorbis Vorbis::vorbisenc Vorbis::vorbisfile
+)
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
     Vorbis::vorbis Vorbis::vorbisenc Vorbis::vorbisfile
 )
 # ===================== Ogg ==============================================
@@ -80,9 +96,15 @@ find_package(Ogg CONFIG REQUIRED)
 set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
     Ogg::ogg
 )
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
+    Ogg::ogg
+)
 # ===================== Opus ==============================================
 find_package(Opus CONFIG REQUIRED)
 set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
+    Opus::opus
+)
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
     Opus::opus
 )
 # ===================== SDL2 mixer =======================================
@@ -90,14 +112,23 @@ find_package(sdl2-mixer CONFIG REQUIRED)
 set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
     SDL2::SDL2_mixer
 )
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
+    SDL2::SDL2_mixer
+)
 # ===================== glm ==============================================
 find_package(glm CONFIG REQUIRED)
 set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
     glm::glm
 )
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
+    glm::glm
+)
 # ===================== png ==============================================
 find_package(libpng CONFIG REQUIRED)
 set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
+    png_static
+)
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
     png_static
 )
 # ===================== entt==============================================
@@ -106,17 +137,16 @@ message(STATUS "EnTT version ${EnTT_VERSION}")
 set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
     EnTT::EnTT
 )
-# ===================== opengl ===========================================
-find_package(OpenGL REQUIRED)
-add_definitions(${OPENGL_DEFINITIONS})
-# # ===================== glad ===========================================
-# add_library(GLAD STATIC "src/glad.c")
-# set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS}
-#     GLAD
-# )
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
+    EnTT::EnTT
+)
 # ===================== ozz ===========================================
 add_subdirectory("C:\\Users\\yoda\\proj\\ozz-animation" "ozz-animation/")
 set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
+    ozz_animation
+    ozz_geometry
+)
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
     ozz_animation
     ozz_geometry
 )
@@ -126,8 +156,12 @@ set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS}
     spdlog::spdlog
     spdlog::spdlog_header_only
 )
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
+    spdlog::spdlog
+    spdlog::spdlog_header_only
+)
+
 # ===================== BGFX ===========================================
-# find_library()
 find_library(BGFX_LIBRARY
     NAMES bgfxRelease
     HINTS "C:\\Users\\yoda\\proj\\bgfx\\.build\\win64_vs2019\\bin\\"
@@ -155,26 +189,37 @@ set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS}
     ${BIMG_LIBRARY}
     ${BIMG_DECODE_LIBRARY}
 )
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
+    ${BGFX_LIBRARY}
+    ${BX_LIBRARY}
+    ${BIMG_LIBRARY}
+    ${BIMG_DECODE_LIBRARY}
+)
+# ===================== assimp ==========================================
+find_package(assimp CONFIG REQUIRED)
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS}
+    assimp::assimp
+)
+# ===================== yaml-cpp ==========================================
+find_package(yaml-cpp CONFIG REQUIRED)
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS}
+    yaml-cpp
+)
 # ========================================================================
-
+# ./bin/dvigl.dll - game engine runtime
+# ========================================================================
 set(NAME "dvigl")
 
-file(GLOB SOURCE "src/${NAME}/*.h" "src/${NAME}/*.cpp")
+file(GLOB SOURCE "src/${NAME}/*.cpp")
 
 add_library(${NAME} SHARED ${SOURCE})
 
 if(WIN32)
     target_compile_options(${NAME} PRIVATE /MT)
+    target_link_options(${NAME} PRIVATE /INCREMENTAL:NO /NODEFAULTLIB:MSVCRT)
 endif()
 
 target_link_libraries(${NAME} PRIVATE ${DVIGL_RUNTIME_LIBS} )
-
-# # 3rd party libraries
-# include(cmake/3rdparty.cmake)
-
-if(WIN32)
-    target_link_options(${NAME} PRIVATE /INCREMENTAL:NO /NODEFAULTLIB:MSVCRT)
-endif()
 
 if(WIN32)
     set_target_properties(
@@ -186,13 +231,39 @@ if(WIN32)
         PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_CURRENT_BINARY_DIR}/bin"
     )
 endif()
-
+# ========================================================================
 include_directories(${CMAKE_SOURCE_DIR}/includes )
+# ========================================================================
+# ./bin/editor.exe - scenes/assets editor/tools
+# ========================================================================
+set(NAME "editor")
+file(GLOB SOURCE "src/${NAME}/*.h" "src/${NAME}/*.cpp")
+add_executable(${NAME} ${SOURCE})
+if(WIN32)
+    target_compile_options(${NAME} PRIVATE /MT)
+    target_link_options(${NAME} PRIVATE /INCREMENTAL:NO /NODEFAULTLIB:MSVCRT)
+endif()
+target_link_libraries(${NAME} PRIVATE ${DVIGL_EDITOR_LIBS})
 
+if(WIN32)
+    set_target_properties(
+        ${NAME}
+        PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
+    )
+    set_target_properties(
+        ${NAME}
+        PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_CURRENT_BINARY_DIR}/bin"
+    )
+endif()
 
+# ========================================================================
 SET(CMAKE_FIND_LIBRARY_SUFFIXES .dll .so ${CMAKE_FIND_LIBRARY_SUFFIXES})
+# ========================================================================
+# ./bin/example_01.exe
+# ========================================================================
 
-set(NAME "game")
+set(NAME "example_01")
 file(GLOB SOURCE "src/${NAME}/*.h" "src/${NAME}/*.cpp")
 add_executable(${NAME} ${SOURCE})
 target_link_libraries(${NAME} PRIVATE dvigl)
