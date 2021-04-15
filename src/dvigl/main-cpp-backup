@@ -1,0 +1,683 @@
+#include <bx/bx.h>
+#if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
+#   if ENTRY_CONFIG_USE_WAYLAND
+#       include <wayland-egl.h>
+#   endif
+#elif BX_PLATFORM_WINDOWS
+#   define SDL_MAIN_HANDLED
+#endif
+#include <bx/os.h>
+
+
+#include "SDL_syswm.h"
+
+#include "SDL.h"
+#include "SDL_net.h"
+#include "SDL_image.h"
+#include "SDL_mixer.h"
+#include "SDL_ttf.h"
+
+
+#include <glad/glad.h>
+
+#include "SDL_opengl.h"
+
+
+#include <entt/entt.hpp>
+
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp> //glm::pi<float>()
+#include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
+#include <glm/gtc/type_ptr.hpp> // glm::value_ptr
+#include <glm/mat4x4.hpp> // glm::mat4
+#include <glm/vec3.hpp> // glm::vec3
+#include <glm/vec4.hpp> // glm::vec4, glm::ivec4
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp> // glm::to_string
+
+#include <cstdio>
+
+// // ================= ozz ================================
+// #include "ozz/animation/runtime/animation.h"
+// #include "ozz/animation/runtime/skeleton.h"
+// #include "ozz/animation/runtime/sampling_job.h"
+// #include "ozz/base/containers/vector.h"
+// #include "ozz/base/maths/soa_transform.h"
+
+// #include "ozz/base/maths/box.h"
+// #include "ozz/base/maths/simd_quaternion.h"
+// #include "ozz/base/memory/allocator.h"
+// #include "ozz/animation/runtime/track.h"
+// #include "ozz/animation/offline/raw_skeleton.h"
+// #include "ozz/animation/runtime/local_to_model_job.h"
+// #include "ozz/base/io/archive.h"
+// #include "ozz/base/io/stream.h"
+// #include "ozz/base/log.h"
+// #include "ozz/base/maths/math_ex.h"
+// #include "ozz/base/maths/simd_math.h"
+// #include "ozz/base/maths/vec_float.h"
+// #include "ozz/base/io/archive_traits.h"
+// #include "ozz/base/platform.h"
+// #include "ozz/base/containers/vector_archive.h"
+// #include "ozz/base/maths/math_archive.h"
+// #include "ozz/base/maths/simd_math_archive.h"
+// #include "ozz/geometry/runtime/skinning_job.h"
+
+
+
+
+
+
+// namespace dvigl {
+
+// // Defines a mesh with skinning information (joint indices and weights).
+// // The mesh is subdivided into parts that group vertices according to their
+// // number of influencing joints. Triangle indices are shared across mesh parts.
+// struct Mesh {
+//   // Number of triangle indices for the mesh.
+//   int triangle_index_count() const {
+//     return static_cast<int>(triangle_indices.size());
+//   }
+
+//   // Number of vertices for all mesh parts.
+//   int vertex_count() const {
+//     int vertex_count = 0;
+//     for (size_t i = 0; i < parts.size(); ++i) {
+//       vertex_count += parts[i].vertex_count();
+//     }
+//     return vertex_count;
+//   }
+
+//   // Maximum number of joints influences for all mesh parts.
+//   int max_influences_count() const {
+//     int max_influences_count = 0;
+//     for (size_t i = 0; i < parts.size(); ++i) {
+//       const int influences_count = parts[i].influences_count();
+//       max_influences_count = influences_count > max_influences_count
+//                                  ? influences_count
+//                                  : max_influences_count;
+//     }
+//     return max_influences_count;
+//   }
+
+//   // Test if the mesh has skinning informations.
+//   bool skinned() const {
+//     for (size_t i = 0; i < parts.size(); ++i) {
+//       if (parts[i].influences_count() != 0) {
+//         return true;
+//       }
+//     }
+//     return false;
+//   }
+
+//   // Returns the number of joints used to skin the mesh.
+//   int num_joints() const { return static_cast<int>(inverse_bind_poses.size()); }
+
+//   // Returns the highest joint number used in the skeleton.
+//   int highest_joint_index() const {
+//     // Takes advantage that joint_remaps is sorted.
+//     return joint_remaps.size() != 0 ? static_cast<int>(joint_remaps.back()) : 0;
+//   }
+
+//   // Defines a portion of the mesh. A mesh is subdivided in sets of vertices
+//   // with the same number of joint influences.
+//   struct Part {
+//     int vertex_count() const { return static_cast<int>(positions.size()) / 3; }
+
+//     int influences_count() const {
+//       const int _vertex_count = vertex_count();
+//       if (_vertex_count == 0) {
+//         return 0;
+//       }
+//       return static_cast<int>(joint_indices.size()) / _vertex_count;
+//     }
+
+//     typedef ozz::vector<float> Positions;
+//     Positions positions;
+//     enum { kPositionsCpnts = 3 };  // x, y, z components
+
+//     typedef ozz::vector<float> Normals;
+//     Normals normals;
+//     enum { kNormalsCpnts = 3 };  // x, y, z components
+
+//     typedef ozz::vector<float> Tangents;
+//     Tangents tangents;
+//     enum { kTangentsCpnts = 4 };  // x, y, z, right or left handed.
+
+//     typedef ozz::vector<float> UVs;
+//     UVs uvs;  // u, v components
+//     enum { kUVsCpnts = 2 };
+
+//     typedef ozz::vector<uint8_t> Colors;
+//     Colors colors;
+//     enum { kColorsCpnts = 4 };  // r, g, b, a components
+
+//     typedef ozz::vector<uint16_t> JointIndices;
+//     JointIndices joint_indices;  // Stride equals influences_count
+
+//     typedef ozz::vector<float> JointWeights;
+//     JointWeights joint_weights;  // Stride equals influences_count - 1
+//   };
+
+//   typedef ozz::vector<Part> Parts;
+//   Parts parts;
+
+//   // Triangles indices. Indices are shared across all parts.
+//   typedef ozz::vector<uint16_t> TriangleIndices;
+//   TriangleIndices triangle_indices;
+
+//   // Joints remapping indices. As a skin might be influenced by a part of the
+//   // skeleton only, joint indices and inverse bind pose matrices are reordered
+//   // to contain only used ones. Note that this array is sorted.
+//   typedef ozz::vector<uint16_t> JointRemaps;
+//   JointRemaps joint_remaps;
+
+//   // Inverse bind-pose matrices. These are only available for skinned meshes.
+//   typedef ozz::vector<ozz::math::Float4x4> InversBindPoses;
+//   InversBindPoses inverse_bind_poses;
+// };
+// } // namespace dvigl
+
+// namespace ozz {
+// namespace io
+// {
+
+// OZZ_IO_TYPE_TAG("ozz-sample-Mesh-Part", dvigl::Mesh::Part)
+// OZZ_IO_TYPE_VERSION(1, dvigl::Mesh::Part)
+
+// template <>
+// struct Extern<dvigl::Mesh::Part> {
+//   static void Save(OArchive& _archive, const dvigl::Mesh::Part* _parts,
+//                    size_t _count);
+//   static void Load(IArchive& _archive, dvigl::Mesh::Part* _parts,
+//                    size_t _count, uint32_t _version);
+// };
+
+// OZZ_IO_TYPE_TAG("ozz-sample-Mesh", dvigl::Mesh)
+// OZZ_IO_TYPE_VERSION(1, dvigl::Mesh)
+
+// template <>
+// struct Extern<dvigl::Mesh> {
+//   static void Save(OArchive& _archive, const dvigl::Mesh* _meshes,
+//                    size_t _count);
+//   static void Load(IArchive& _archive, dvigl::Mesh* _meshes, size_t _count,
+//                    uint32_t _version);
+// };
+// }  // namespace io
+// }   // namespace dvigl
+
+// bool LoadSkeleton(const char* _filename, ozz::animation::Skeleton* _skeleton)
+// {
+//   assert(_filename && _skeleton);
+//   ozz::log::Out() << "Loading skeleton archive " << _filename << "."
+//                   << std::endl;
+//   ozz::io::File file(_filename, "rb");
+//   if (!file.opened()) {
+//     ozz::log::Err() << "Failed to open skeleton file " << _filename << "."
+//                     << std::endl;
+//     return false;
+//   }
+//   ozz::io::IArchive archive(&file);
+//   if (!archive.TestTag<ozz::animation::Skeleton>()) {
+//     ozz::log::Err() << "Failed to load skeleton instance from file "
+//                     << _filename << "." << std::endl;
+//     return false;
+//   }
+
+//   // Once the tag is validated, reading cannot fail.
+//   archive >> *_skeleton;
+
+//   return true;
+// }
+
+// bool LoadAnimation(const char* _filename,
+//                    ozz::animation::Animation* _animation)
+// {
+//   assert(_filename && _animation);
+//   ozz::log::Out() << "Loading animation archive: " << _filename << "."
+//                   << std::endl;
+//   ozz::io::File file(_filename, "rb");
+//   if (!file.opened()) {
+//     ozz::log::Err() << "Failed to open animation file " << _filename << "."
+//                     << std::endl;
+//     return false;
+//   }
+//   ozz::io::IArchive archive(&file);
+//   if (!archive.TestTag<ozz::animation::Animation>()) {
+//     ozz::log::Err() << "Failed to load animation instance from file "
+//                     << _filename << "." << std::endl;
+//     return false;
+//   }
+
+//   // Once the tag is validated, reading cannot fail.
+//   archive >> *_animation;
+
+//   return true;
+// }
+
+// bool LoadMeshes(const char* _filename,
+//                 ozz::vector<dvigl::Mesh>* _meshes)
+// {
+//   assert(_filename && _meshes);
+//   ozz::log::Out() << "Loading meshes archive: " << _filename << "."
+//                   << std::endl;
+//   ozz::io::File file(_filename, "rb");
+//   if (!file.opened()) {
+//     ozz::log::Err() << "Failed to open mesh file " << _filename << "."
+//                     << std::endl;
+//     return false;
+//   }
+//   ozz::io::IArchive archive(&file);
+
+//   while (archive.TestTag<dvigl::Mesh>()) {
+//     _meshes->resize(_meshes->size() + 1);
+//     archive >> _meshes->back();
+//   }
+
+//   return true;
+// }
+
+
+
+
+
+__declspec(dllexport) int entrypoint(int argc, char const *argv[])
+{
+
+    // ========== sdl2  ========================
+    int result = SDL_Init(SDL_INIT_EVERYTHING);
+    if (result)
+    {
+        printf("SDL_Init failed: %s\n", SDL_GetError());
+        return result;
+    }
+    // ========== sdl2 net ========================
+
+    result = SDLNet_Init();
+
+    if (result)
+    {
+        printf("SDLNet_Init: %s\n", SDLNet_GetError());
+        return result;
+    }
+
+    // ========== sdl2 img ========================
+    int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG | IMG_INIT_TIF;
+    result = IMG_Init(imgFlags);
+    if (!(result & imgFlags))
+    {
+        printf("SDL_image error: %s\n", IMG_GetError());
+        return result;
+    }
+
+    SDL_PixelFormat RGBAFormat;
+
+    RGBAFormat.palette = 0;
+    RGBAFormat.BitsPerPixel = 32;
+    RGBAFormat.BytesPerPixel = 4;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    RGBAFormat.Rmask = 0xFF000000;
+    RGBAFormat.Rshift = 0;
+    RGBAFormat.Rloss = 0;
+    RGBAFormat.Gmask = 0x00FF0000;
+    RGBAFormat.Gshift = 8;
+    RGBAFormat.Gloss = 0;
+    RGBAFormat.Bmask = 0x0000FF00;
+    RGBAFormat.Bshift = 16;
+    RGBAFormat.Bloss = 0;
+    RGBAFormat.Amask = 0x000000FF;
+    RGBAFormat.Ashift = 24;
+    RGBAFormat.Aloss = 0;
+#else
+    RGBAFormat.Rmask = 0x000000FF;
+    RGBAFormat.Rshift = 24;
+    RGBAFormat.Rloss = 0;
+    RGBAFormat.Gmask = 0x0000FF00;
+    RGBAFormat.Gshift = 16;
+    RGBAFormat.Gloss = 0;
+    RGBAFormat.Bmask = 0x00FF0000;
+    RGBAFormat.Bshift = 8;
+    RGBAFormat.Bloss = 0;
+    RGBAFormat.Amask = 0xFF000000;
+    RGBAFormat.Ashift = 0;
+    RGBAFormat.Aloss = 0;
+#endif
+
+    SDL_Surface* surf = IMG_Load("../res/textures/dirt_seamless.jpg");
+    if (!surf)
+    {
+        printf("IMG_Load error: %s\n", IMG_GetError());
+        return 1;
+    }
+    printf("dirt_seamless %dx%d\n", surf->w, surf->h);
+    surf = IMG_Load("../res/textures/elvis_face.png");
+    if (!surf)
+    {
+        printf("IMG_Load error: %s\n", IMG_GetError());
+        return 1;
+    }
+    printf("elvis_face %dx%d\n", surf->w, surf->h);
+    surf = IMG_Load("../res/textures/round_grill.tga");
+    if (!surf)
+    {
+        printf("IMG_Load error: %s\n", IMG_GetError());
+        return 1;
+    }
+    printf("round_grill %dx%d\n", surf->w, surf->h);
+
+    SDL_Surface* converted = NULL;
+
+    converted = SDL_ConvertSurface(surf, &RGBAFormat, SDL_SWSURFACE);
+    SDL_FreeSurface(surf);
+
+    if (!converted)
+    {
+        printf("SDL_ConvertSurface error: %s\n", SDL_GetError());
+        return 1;
+    }
+    // ========== sdl2 mixer ========================
+    int mixerFlags = MIX_INIT_OGG |
+    			MIX_INIT_MP3 |
+    			MIX_INIT_OPUS |
+    			MIX_INIT_FLAC |
+    			MIX_INIT_MID;
+    result = Mix_Init(mixerFlags);
+    if (!(result & mixerFlags))
+    {
+        printf("Mix_Init: Failed to init required ogg and mod support!\n");
+        printf("Mix_Init: %s\n", Mix_GetError());
+    }
+
+    if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
+    {
+    	printf("Mix_OpenAudio failed\n");
+        return 1;
+    }
+
+    Mix_Music* music = Mix_LoadMUS("../res/audio/links_2_3_4.mp3");
+    if (music == NULL)
+    {
+    	printf("Failed to load music\n");
+    	return 1;
+    }
+    Mix_PlayMusic(music, -1);
+    // ========== sdl2 ttf ========================
+    if (TTF_Init() == -1)
+    {
+    	printf("TTF_Init error: %s\n", TTF_GetError());
+    	return 1;
+    }
+    auto f = TTF_OpenFont("../res/fonts/SourceCodePro-Regular.ttf", 24);
+    if (!f)
+    {
+        printf("TTF_OpenFont error: %s\n", TTF_GetError());
+    }
+    SDL_Color color = {255, 255, 255};
+    SDL_Surface* text_surf = TTF_RenderUTF8_Blended(f, "Hello world", color);
+    if (!text_surf)
+    {
+        printf("TTF_RenderUTF8_Blended error: %s\n", TTF_GetError());
+        return NULL;
+    }
+    printf("Hello world text_surf %dx%d\n", text_surf->w, text_surf->h);
+
+    TTF_CloseFont(f);
+	// ========================== EnTT and glm ================================
+    struct TransformComponent
+    {
+        glm::mat4 Transform;
+        TransformComponent() = default;
+        TransformComponent(const TransformComponent&) = default;
+        TransformComponent(const glm::mat4& transform) : Transform(transform) {}
+        operator glm::mat4&() { return Transform; }
+        operator const glm::mat4&() const { return Transform; }
+    };
+
+    struct MeshComponent
+    {
+        int mesh_id;
+        MeshComponent() = default;
+        MeshComponent(const MeshComponent&) = default;
+        MeshComponent(const int id) : mesh_id(id) {}
+    };
+
+    TransformComponent transform;
+    MeshComponent mc;
+
+	entt::registry m_Registry;
+    entt::entity entity = m_Registry.create();
+    auto transf = m_Registry.emplace<TransformComponent>(entity, glm::mat4(1.0f));
+    auto x = m_Registry.emplace<MeshComponent>(entity, mc);
+    auto v = m_Registry.view<TransformComponent, MeshComponent>();
+    for (auto entity: v)
+    {
+        auto [ttt, mmm] = v.get<TransformComponent, MeshComponent>(entity);
+        printf("Entity: %d, transform: %s, mesh_id: %d\n", (int) entity, glm::to_string(ttt.Transform).c_str(), mmm.mesh_id);
+    }
+ //    // ============================= OZZ ==================================================
+
+	// std::string skeleton = "../res/models/skeleton.ozz";
+	// std::string animation = "../res/models/animation.ozz";
+	// std::string mesh = "../res/models/mesh.ozz";
+
+	// ozz::animation::Skeleton m_skeleton;
+	// ozz::animation::Animation m_animation;
+	// ozz::vector<dvigl::Mesh> m_meshes;
+
+ //        // Reading skeleton.
+ //    if (!LoadSkeleton(skeleton.c_str(), &m_skeleton)) {
+ //      // return false;
+ //      return 1;
+ //    }
+
+ //    // Reading animation.
+ //    if (!LoadAnimation(animation.c_str(), &m_animation)) {
+ //      // return false;
+ //      return 1;
+ //    }
+
+ //    // Reading skinned meshes.
+ //    if (!LoadMeshes(mesh.c_str(), &m_meshes)) {
+ //      // return false;
+ //      return 1;
+ //    }
+
+ //    // =====================================================================================
+    SDL_Window* main_window;
+    SDL_GLContext gl_context;
+
+
+
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+    // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
+
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
+
+#if defined(__PLATFORM_APPLE__)
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+#endif
+
+    int flags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI
+        // | SDL_WINDOW_MOUSE_FOCUS
+        // | SDL_WINDOW_INPUT_GRABBED
+        // | SDL_WINDOW_FULLSCREEN
+        // | SDL_WINDOW_BORDERLESS
+        | SDL_WINDOW_RESIZABLE
+#ifdef __PLATFORM_ANDROID__
+        | SDL_WINDOW_BORDERLESS | SDL_WINDOW_FULLSCREEN_DESKTOP
+#else
+// | SDL_WINDOW_RESIZABLE
+#endif
+        ;
+
+    std::string window_title = "Window title";
+
+    // int w = 320;
+    // int h = 240;
+
+    int w = 1024;
+    int h = 768;
+
+    // int w = 1920;
+    // int h = 1080;
+
+    main_window = SDL_CreateWindow(window_title.c_str(), 200, 100, w, h, flags);
+
+    if (!main_window)
+    {
+        printf("SDL_CreateWindow failed: %s\n", SDL_GetError());
+        return 1;
+    }
+    SDL_ClearError();
+
+    SDL_Surface* icon = IMG_Load("../res/icons/icon.png");
+    SDL_SetWindowIcon(main_window, icon);
+
+//     gl_context = SDL_GL_CreateContext(main_window);
+
+//     if (!gl_context)
+//     {
+//         printf("SDL_GL_CreateContext failed: %s\n", SDL_GetError());
+//         return 1;
+//     }
+
+
+//     if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
+//     {
+//         printf("Failed to initialize the OpenGL context.\n");
+//         return 1;
+//     }
+
+//     // printf("rendering context: OpenGL %d.%d Core profile\n", GLVersion.major, GLVersion.minor);
+
+//     const char* sdl_error = SDL_GetError();
+//     if (strlen(sdl_error) != 0)
+//     {
+//         printf("*************************\nSDL ERRORS: %s\n", sdl_error);
+//     }
+
+
+//     // set VSync
+//     // if (SDL_GL_SetSwapInterval(0)) {
+//     // if (SDL_GL_SetSwapInterval(1)) {
+//     if (SDL_GL_SetSwapInterval(-1))
+//     {
+//         printf("SDL_GL_SetSwapInterval failed: %s\n", SDL_GetError());
+//     }
+
+
+//     SDL_GL_MakeCurrent(main_window, gl_context);
+
+//     // glEnable(GL_MULTISAMPLE);
+
+//     glEnable(GL_STENCIL_TEST);
+//     glDisable(GL_POLYGON_SMOOTH);
+//     glEnable(GL_LINE_SMOOTH);
+
+//     glCullFace(GL_BACK);
+//     glEnable(GL_CULL_FACE);
+//     // glDisable(GL_CULL_FACE);
+
+//     glDisable(GL_BLEND);
+//     // glEnable(GL_BLEND);
+//     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+//     glEnable(GL_DEPTH_TEST);
+//     glDepthFunc(GL_LEQUAL);
+//     glDepthRange(0.0, 1.0);
+
+//     // glClearColor(0.01f, 0.1f, 0.01f, 1.0f);
+//     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+// #if !defined(__PLATFORM_ANDROID__)
+//     // printf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+//     // int max_attrs = 0;
+//     // glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &max_attrs);
+//     // printf("%d\n", max_attrs);
+
+//     // printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+//     // // glShadeModel(GL_SMOOTH);
+//     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//     glFrontFace(GL_CCW);
+// // glFrontFace(GL_CW);
+// // glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+// #endif
+
+
+
+//     SDL_GL_GetDrawableSize(main_window, &w, &h);
+
+//     glViewport(0, 0, w, h);
+//     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+//     SDL_GL_SwapWindow(main_window);
+
+    // GLuint err = glGetError();
+    // if (err != 0)
+    // {
+    //     printf("GL Renderer init ERRORS HERE ================\n");
+    //     printf("%d \n", err);
+    //     printf("================\n");
+    // }
+
+
+    bool quit = false;
+    SDL_Event event;
+    while (!quit)
+    {
+
+        while (SDL_PollEvent(&event) != 0)
+        {
+            if (event.type == SDL_QUIT)
+            {
+                quit = true;
+            }
+            // ImGui_ImplSDL2_ProcessEvent(&event);
+        }
+
+	    // SDL_GL_MakeCurrent(main_window, gl_context);
+	    // SDL_GL_GetDrawableSize(main_window, &w, &h);
+	    // glViewport(0, 0, w, h);
+	    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	    // SDL_GL_SwapWindow(main_window);
+        SDL_Delay(10);
+	    const char* sdl_error = SDL_GetError();
+	    if (strlen(sdl_error) != 0)
+	    {
+	        printf("*************************\nSDL ERRORS: %s\n", sdl_error);
+	    }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    printf("Hello from dvigl!\n");
+
+	Mix_FreeMusic(music);
+
+	IMG_Quit();
+	TTF_Quit();
+    SDLNet_Quit();
+    SDL_Quit();
+	return 0;
+}
