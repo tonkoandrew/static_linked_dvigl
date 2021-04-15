@@ -115,11 +115,11 @@ add_definitions(${OPENGL_DEFINITIONS})
 #     GLAD
 # )
 # ===================== ozz ===========================================
-# add_subdirectory("C:\\Users\\yoda\\proj\\ozz-animation" "ozz-animation/")
-# set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
-#     ozz_animation
-#     ozz_geometry
-# )
+add_subdirectory("C:\\Users\\yoda\\proj\\ozz-animation" "ozz-animation/")
+set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
+    ozz_animation
+    ozz_geometry
+)
 # ===================== spdlog logging ===================================
 find_package(spdlog CONFIG REQUIRED)
 set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 

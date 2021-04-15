@@ -257,27 +257,6 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 		return false;
 	}
 
-	int cmdMouseLock(CmdContext* /*_context*/, void* /*_userData*/, int _argc, char const* const* _argv)
-	{
-		if (1 < _argc)
-		{
-			bool set = false;
-			if (2 < _argc)
-			{
-				bx::fromString(&set, _argv[1]);
-				inputSetMouseLock(set);
-			}
-			else
-			{
-				inputSetMouseLock(!inputIsMouseLocked() );
-			}
-
-			return bx::kExitSuccess;
-		}
-
-		return bx::kExitFailure;
-	}
-
 	int cmdGraphics(CmdContext* /*_context*/, void* /*_userData*/, int _argc, char const* const* _argv)
 	{
 		if (_argc > 1)
@@ -575,7 +554,6 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 		s_fileWriter = BX_NEW(g_allocator, FileWriter);
 
 		cmdInit();
-		cmdAdd("mouselock", cmdMouseLock);
 		cmdAdd("graphics",  cmdGraphics );
 		cmdAdd("exit",      cmdExit     );
 		cmdAdd("app",       cmdApp      );
@@ -586,8 +564,7 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 		entry::WindowHandle defaultWindow = { 0 };
 
 		bx::FilePath fp(_argv[0]);
-		char title[bx::kMaxFilePath];
-		bx::strCopy(title, BX_COUNTOF(title), fp.getBaseName() );
+		char* title = "BGFX -> SDL Window";
 
 		entry::setWindowTitle(defaultWindow, title);
 		setWindowSize(defaultWindow, ENTRY_DEFAULT_WIDTH, ENTRY_DEFAULT_HEIGHT);

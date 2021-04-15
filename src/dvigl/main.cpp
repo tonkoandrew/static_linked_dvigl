@@ -51,6 +51,76 @@ BX_PRAGMA_DIAGNOSTIC_POP()
 #include <glm/gtx/string_cast.hpp> // glm::to_string
 
 
+
+#include "ozz/animation/runtime/animation.h"
+#include "ozz/animation/runtime/skeleton.h"
+#include "ozz/animation/runtime/sampling_job.h"
+#include "ozz/base/containers/vector.h"
+#include "ozz/base/maths/soa_transform.h"
+
+#include "ozz/base/maths/box.h"
+#include "ozz/base/maths/simd_quaternion.h"
+#include "ozz/base/memory/allocator.h"
+#include "ozz/animation/runtime/track.h"
+#include "ozz/animation/offline/raw_skeleton.h"
+#include "ozz/animation/runtime/local_to_model_job.h"
+#include "ozz/base/io/archive.h"
+#include "ozz/base/io/stream.h"
+#include "ozz/base/log.h"
+#include "ozz/base/maths/math_ex.h"
+#include "ozz/base/maths/simd_math.h"
+#include "ozz/base/maths/vec_float.h"
+#include "ozz/base/io/archive_traits.h"
+#include "ozz/base/platform.h"
+#include "ozz/base/containers/vector_archive.h"
+#include "ozz/base/maths/math_archive.h"
+#include "ozz/base/maths/simd_math_archive.h"
+#include "ozz/geometry/runtime/skinning_job.h"
+
+
+bool LoadSkeleton(const char* _filename, ozz::animation::Skeleton* _skeleton)
+{
+  assert(_filename && _skeleton);
+  spdlog::debug("Loading skeleton archive {}.", _filename);
+  ozz::io::File file(_filename, "rb");
+  if (!file.opened()) {
+	spdlog::error("Failed to open skeleton file {}.", _filename);
+    return false;
+  }
+  ozz::io::IArchive archive(&file);
+  if (!archive.TestTag<ozz::animation::Skeleton>()) {
+	spdlog::error("Failed to load skeleton instance from file {}.", _filename);
+    return false;
+  }
+
+  // Once the tag is validated, reading cannot fail.
+  archive >> *_skeleton;
+
+  return true;
+}
+
+bool LoadAnimation(const char* _filename,
+                   ozz::animation::Animation* _animation)
+{
+  assert(_filename && _animation);
+  spdlog::debug("Loading animation archive: {}.", _filename);
+  ozz::io::File file(_filename, "rb");
+  if (!file.opened()) {
+    spdlog::error("Failed to open animation file {}.", _filename);
+    return false;
+  }
+  ozz::io::IArchive archive(&file);
+  if (!archive.TestTag<ozz::animation::Animation>()) {
+    spdlog::error("Failed to load animation instance from file {}.", _filename);
+    return false;
+  }
+
+  // Once the tag is validated, reading cannot fail.
+  archive >> *_animation;
+  return true;
+}
+
+
 namespace entry
 {
 	///
@@ -392,6 +462,8 @@ namespace entry
 			, m_mouseLock(false)
 			, m_fullscreen(false)
 		{
+			spdlog::set_level(spdlog::level::debug);
+
 			bx::memSet(s_translateKey, 0, sizeof(s_translateKey) );
 			initTranslateKey(SDL_SCANCODE_ESCAPE,       Key::Esc);
 			initTranslateKey(SDL_SCANCODE_RETURN,       Key::Return);
@@ -568,7 +640,7 @@ namespace entry
         spdlog::error("IMG_Load error: {}", IMG_GetError());
         // return 1;
     } else {
-	    spdlog::info("dirt_seamless {}x{}", surf->w, surf->h);
+	    spdlog::debug("dirt_seamless {}x{}", surf->w, surf->h);
 	    SDL_FreeSurface(surf);
     }
 
@@ -578,7 +650,7 @@ namespace entry
         spdlog::error("IMG_Load error: {}", IMG_GetError());
         // return 1;
     } else {
-    	spdlog::info("elvis_face {}x{}", surf->w, surf->h);
+    	spdlog::debug("elvis_face {}x{}", surf->w, surf->h);
     	SDL_FreeSurface(surf);
     }
 
@@ -588,7 +660,7 @@ namespace entry
         spdlog::error("IMG_Load error: {}", IMG_GetError());
         // return 1;
     } else {
-	    spdlog::info("round_grill {}x{}", surf->w, surf->h);
+	    spdlog::debug("round_grill {}x{}", surf->w, surf->h);
     }
 
     SDL_Surface* converted = NULL;
@@ -644,7 +716,7 @@ namespace entry
         spdlog::error("TTF_RenderUTF8_Blended error: {}", TTF_GetError());
         // return NULL;
     }
-    spdlog::info("Hello world text_surf {}x{}", text_surf->w, text_surf->h);
+    spdlog::debug("Hello world text_surf {}x{}", text_surf->w, text_surf->h);
 
     TTF_CloseFont(f);
 	// ========================== EnTT and glm ================================
@@ -677,29 +749,28 @@ namespace entry
     for (auto entity: v)
     {
         auto [ttt, mmm] = v.get<TransformComponent, MeshComponent>(entity);
-        spdlog::info("Entity: {}, transform: {}, mesh_id: {}", (int) entity, glm::to_string(ttt.Transform).c_str(), (int) mmm.mesh_id);
+        spdlog::debug("Entity: {}, transform: {}, mesh_id: {}", (int) entity, glm::to_string(ttt.Transform).c_str(), (int) mmm.mesh_id);
     }
  //    // ============================= OZZ ==================================================
 
-	// std::string skeleton = "../res/models/skeleton.ozz";
-	// std::string animation = "../res/models/animation.ozz";
+	std::string skeleton = "../res/models/skeleton.ozz";
+	std::string animation = "../res/models/animation.ozz";
 	// std::string mesh = "../res/models/mesh.ozz";
 
-	// ozz::animation::Skeleton m_skeleton;
-	// ozz::animation::Animation m_animation;
+	ozz::animation::Skeleton m_skeleton;
+	ozz::animation::Animation m_animation;
+
 	// ozz::vector<dvigl::Mesh> m_meshes;
 
- //        // Reading skeleton.
- //    if (!LoadSkeleton(skeleton.c_str(), &m_skeleton)) {
- //      // return false;
- //      // return 1;
- //    }
+    // Reading skeleton.
+    if (!LoadSkeleton(skeleton.c_str(), &m_skeleton)) {
+    	spdlog::error("Failed to load skeleton {}", skeleton);
+    }
 
- //    // Reading animation.
- //    if (!LoadAnimation(animation.c_str(), &m_animation)) {
- //      // return false;
- //      // return 1;
- //    }
+    // Reading animation.
+    if (!LoadAnimation(animation.c_str(), &m_animation)) {
+    	spdlog::error("Failed to load animation {}", animation);
+    }
 
  //    // Reading skinned meshes.
  //    if (!LoadMeshes(mesh.c_str(), &m_meshes)) {
@@ -719,6 +790,10 @@ namespace entry
 							, SDL_WINDOW_SHOWN
 							| SDL_WINDOW_RESIZABLE
 							);
+
+			SDL_Surface* icon = IMG_Load("../res/icons/icon.png");
+		    SDL_SetWindowIcon(m_window[0], icon);
+
 
 			m_flags[0] = 0
 				| ENTRY_WINDOW_FLAG_ASPECT_RATIO
@@ -1450,15 +1525,15 @@ switch (bgfx::getRendererType())
 	default:
 		break;
 }
-spdlog::debug("test debug");
-spdlog::warn("test warning");
-spdlog::critical("test critical");
-spdlog::error("test error {}, {:.2f}", 42, 42.0f);
+	spdlog::debug("test debug");
+	spdlog::warn("test warning");
+	spdlog::critical("test critical");
+	spdlog::error("test error {}, {:.2f}", 42, 42.0f);
 
-    spdlog::set_level(spdlog::level::warn); // Set global log level to debug
-    spdlog::debug("This message should not be displayed..");    
-    spdlog::set_level(spdlog::level::debug); // Set global log level to debug
-    spdlog::debug("This message should be displayed..");    
+    // spdlog::set_level(spdlog::level::warn);
+    // spdlog::debug("This message should not be displayed..");    
+    // spdlog::set_level(spdlog::level::debug);
+    // spdlog::debug("This message should be displayed..");    
 
 
 
@@ -1482,8 +1557,6 @@ spdlog::error("test error {}, {:.2f}", 42, 42.0f);
 	{
 		// Shutdown bgfx.
 		bgfx::shutdown();
-
-	    spdlog::info("Hello from dvigl!");
     	return 0;
 	}
 
@@ -1532,6 +1605,7 @@ spdlog::error("test error {}, {:.2f}", 42, 42.0f);
 
 int _main_(int _argc, char** _argv)
 {
+	spdlog::set_level(spdlog::level::debug);
 	ExampleHelloWorld app;
 	return entry::runApp(&app, _argc, _argv);
 }
