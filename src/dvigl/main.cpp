@@ -1,5 +1,6 @@
-#include "entry_p.h"
+#include "spdlog/spdlog.h"
 
+#include "entry_p.h"
 
 #if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
 #	if ENTRY_CONFIG_USE_WAYLAND
@@ -503,7 +504,7 @@ namespace entry
 
 		int run(int _argc, char** _argv)
 		{
-			printf("STARTUEM BGFX\n");
+			spdlog::info("Starting BGFX");
 			m_mte.m_argc = _argc;
 			m_mte.m_argv = _argv;
 
@@ -515,7 +516,7 @@ namespace entry
 
     if (result)
     {
-        printf("SDLNet_Init: %s\n", SDLNet_GetError());
+        spdlog::error("SDLNet_Init: %s", SDLNet_GetError());
         // return result;
     }
 
@@ -524,7 +525,7 @@ namespace entry
     result = IMG_Init(imgFlags);
     if (!(result & imgFlags))
     {
-        printf("SDL_image error: %s\n", IMG_GetError());
+        spdlog::error("SDL_image error: %s", IMG_GetError());
         // return result;
     }
 
@@ -564,30 +565,30 @@ namespace entry
     SDL_Surface* surf = IMG_Load("../res/textures/dirt_seamless.jpg");
     if (!surf)
     {
-        printf("IMG_Load error: %s\n", IMG_GetError());
+        spdlog::error("IMG_Load error: %s", IMG_GetError());
         // return 1;
     } else {
-	    printf("dirt_seamless %dx%d\n", surf->w, surf->h);
+	    spdlog::info("dirt_seamless %dx%d", surf->w, surf->h);
 	    SDL_FreeSurface(surf);
     }
 
     surf = IMG_Load("../res/textures/elvis_face.png");
     if (!surf)
     {
-        printf("IMG_Load error: %s\n", IMG_GetError());
+        spdlog::error("IMG_Load error: %s", IMG_GetError());
         // return 1;
     } else {
-    	printf("elvis_face %dx%d\n", surf->w, surf->h);
+    	spdlog::info("elvis_face %dx%d", surf->w, surf->h);
     	SDL_FreeSurface(surf);
     }
 
     surf = IMG_Load("../res/textures/round_grill.tga");
     if (!surf)
     {
-        printf("IMG_Load error: %s\n", IMG_GetError());
+        spdlog::error("IMG_Load error: %s", IMG_GetError());
         // return 1;
     } else {
-	    printf("round_grill %dx%d\n", surf->w, surf->h);
+	    spdlog::info("round_grill %dx%d", surf->w, surf->h);
     }
 
     SDL_Surface* converted = NULL;
@@ -596,7 +597,7 @@ namespace entry
 
     if (!converted)
     {
-        printf("SDL_ConvertSurface error: %s\n", SDL_GetError());
+        spdlog::error("SDL_ConvertSurface error: %s", SDL_GetError());
         // return 1;
     }
     // ========== sdl2 mixer ========================
@@ -608,42 +609,42 @@ namespace entry
     result = Mix_Init(mixerFlags);
     if (!(result & mixerFlags))
     {
-        printf("Mix_Init: Failed to init required ogg and mod support!\n");
-        printf("Mix_Init: %s\n", Mix_GetError());
+        spdlog::error("Mix_Init: Failed to init required ogg and mod support!");
+        spdlog::error("Mix_Init: %s", Mix_GetError());
     }
 
     if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
     {
-    	printf("Mix_OpenAudio failed\n");
+    	spdlog::error("Mix_OpenAudio failed");
         // return 1;
     }
 
     music = Mix_LoadMUS("../res/audio/links_2_3_4.mp3");
     if (music == NULL)
     {
-    	printf("Failed to load music\n");
+    	spdlog::error("Failed to load music");
     	// return 1;
     }
     Mix_PlayMusic(music, -1);
     // ========== sdl2 ttf ========================
     if (TTF_Init() == -1)
     {
-    	printf("TTF_Init error: %s\n", TTF_GetError());
+    	spdlog::error("TTF_Init error: %s", TTF_GetError());
     	// return 1;
     }
     auto f = TTF_OpenFont("../res/fonts/SourceCodePro-Regular.ttf", 24);
     if (!f)
     {
-        printf("TTF_OpenFont error: %s\n", TTF_GetError());
+        spdlog::error("TTF_OpenFont error: %s", TTF_GetError());
     }
     SDL_Color color = {255, 255, 255};
     SDL_Surface* text_surf = TTF_RenderUTF8_Blended(f, "Hello world", color);
     if (!text_surf)
     {
-        printf("TTF_RenderUTF8_Blended error: %s\n", TTF_GetError());
+        spdlog::error("TTF_RenderUTF8_Blended error: %s", TTF_GetError());
         // return NULL;
     }
-    printf("Hello world text_surf %dx%d\n", text_surf->w, text_surf->h);
+    spdlog::info("Hello world text_surf %dx%d", text_surf->w, text_surf->h);
 
     TTF_CloseFont(f);
 	// ========================== EnTT and glm ================================
@@ -676,7 +677,7 @@ namespace entry
     for (auto entity: v)
     {
         auto [ttt, mmm] = v.get<TransformComponent, MeshComponent>(entity);
-        printf("Entity: %d, transform: %s, mesh_id: %d\n", (int) entity, glm::to_string(ttt.Transform).c_str(), mmm.mesh_id);
+        spdlog::info("Entity: %d, transform: %s, mesh_id: %d", (int) entity, glm::to_string(ttt.Transform).c_str(), mmm.mesh_id);
     }
  //    // ============================= OZZ ==================================================
 
@@ -1432,23 +1433,24 @@ public:
 switch (bgfx::getRendererType())
 {
 	case (bgfx::RendererType::Direct3D9):
-		printf("Direct3D9\n");
+		spdlog::info("Direct3D9");
 		break;
 	case (bgfx::RendererType::Direct3D11):
-		printf("Direct3D11\n");
+		spdlog::info("Direct3D11");
 		break;
 	case (bgfx::RendererType::Direct3D12):
-		printf("Direct3D12\n");
+		spdlog::info("Direct3D12");
 		break;
 	case (bgfx::RendererType::OpenGL):
-		printf("OpenGL\n");
+		spdlog::info("OpenGL");
 		break;
 	case (bgfx::RendererType::Vulkan):
-		printf("Vulkan\n");
+		spdlog::info("Vulkan");
 		break;
 	default:
 		break;
 }
+spdlog::error("test error %d", 42);
 
 		// Enable debug text.
 		// bgfx::setDebug(m_debug);
@@ -1472,10 +1474,8 @@ switch (bgfx::getRendererType())
 		// Shutdown bgfx.
 		bgfx::shutdown();
 
-
-    printf("Hello from dvigl!\n");
-
-		return 0;
+	    spdlog::info("Hello from dvigl!");
+    	return 0;
 	}
 
 	bool update() override

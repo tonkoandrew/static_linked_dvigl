@@ -120,6 +120,12 @@ add_definitions(${OPENGL_DEFINITIONS})
 #     ozz_animation
 #     ozz_geometry
 # )
+# ===================== spdlog logging ===================================
+find_package(spdlog CONFIG REQUIRED)
+set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
+    spdlog::spdlog
+    spdlog::spdlog_header_only
+)
 # ===================== BGFX ===========================================
 # find_library()
 find_library(BGFX_LIBRARY
