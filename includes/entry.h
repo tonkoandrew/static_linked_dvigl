@@ -7,12 +7,10 @@
 #define ENTRY_H_HEADER_GUARD
 
 #include <bx/bx.h>
-#include <bx/filepath.h>
-#include <bx/string.h>
 
 namespace bx { struct FileReaderI; struct FileWriterI; struct AllocatorI; }
 
-extern "C" int _main_(int _argc, char** _argv);
+extern "C" int _main_();
 
 #define ENTRY_WINDOW_FLAG_NONE         UINT32_C(0x00000000)
 #define ENTRY_WINDOW_FLAG_ASPECT_RATIO UINT32_C(0x00000001)
@@ -228,8 +226,6 @@ namespace entry
 
 	bool processEvents(uint32_t& _width, uint32_t& _height, uint32_t& _debug, uint32_t& _reset, MouseState* _mouse = NULL);
 
-	bx::FileReaderI* getFileReader();
-	bx::FileWriterI* getFileWriter();
 	bx::AllocatorI*  getAllocator();
 
 	WindowHandle createWindow(int32_t _x, int32_t _y, uint32_t _width, uint32_t _height, uint32_t _flags = ENTRY_WINDOW_FLAG_NONE, const char* _title = "");
@@ -257,7 +253,6 @@ namespace entry
 		uint32_t     m_height;
 		MouseState   m_mouse;
 		void*        m_nwh;
-		bx::FilePath m_dropFile;
 	};
 
 	bool processWindowEvents(WindowState& _state, uint32_t& _debug, uint32_t& _reset);
@@ -272,7 +267,7 @@ namespace entry
 		virtual ~AppI() = 0;
 
 		///
-		virtual void init(int32_t _argc, const char* const* _argv, uint32_t _width, uint32_t _height) = 0;
+		virtual void init(uint32_t _width, uint32_t _height) = 0;
 
 		///
 		virtual int  shutdown() = 0;
@@ -307,7 +302,7 @@ namespace entry
 	uint32_t getNumApps();
 
 	///
-	int runApp(AppI* _app, int _argc, const char* const* _argv);
+	int runApp(AppI* _app);
 
 } // namespace entry
 

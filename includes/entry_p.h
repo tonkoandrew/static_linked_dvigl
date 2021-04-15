@@ -9,34 +9,8 @@
 #define TINYSTL_ALLOCATOR entry::TinyStlAllocator
 
 #include <bx/spscqueue.h>
-#include <bx/filepath.h>
 
 #include "entry.h"
-
-#ifndef ENTRY_CONFIG_USE_NOOP
-#	define ENTRY_CONFIG_USE_NOOP 0
-#endif // ENTRY_CONFIG_USE_NOOP
-
-#ifndef ENTRY_CONFIG_USE_SDL
-#	define ENTRY_CONFIG_USE_SDL 0
-#endif // ENTRY_CONFIG_USE_SDL
-
-#ifndef ENTRY_CONFIG_USE_GLFW
-#	define ENTRY_CONFIG_USE_GLFW 0
-#endif // ENTRY_CONFIG_USE_GLFW
-
-#ifndef ENTRY_CONFIG_USE_WAYLAND
-#	define ENTRY_CONFIG_USE_WAYLAND 0
-#endif // ENTRY_CONFIG_USE_WAYLAND
-
-#if !defined(ENTRY_CONFIG_USE_NATIVE) \
-	&& !ENTRY_CONFIG_USE_NOOP \
-	&& !ENTRY_CONFIG_USE_SDL \
-	&& !ENTRY_CONFIG_USE_GLFW
-#	define ENTRY_CONFIG_USE_NATIVE 1
-#else
-#	define ENTRY_CONFIG_USE_NATIVE 0
-#endif // ...
 
 #ifndef ENTRY_CONFIG_MAX_WINDOWS
 #	define ENTRY_CONFIG_MAX_WINDOWS 8
@@ -57,10 +31,6 @@
 #	define ENTRY_CONFIG_IMPLEMENT_DEFAULT_ALLOCATOR 1
 #endif // ENTRY_CONFIG_IMPLEMENT_DEFAULT_ALLOCATOR
 
-#ifndef ENTRY_CONFIG_PROFILER
-#	define ENTRY_CONFIG_PROFILER 0
-#endif // ENTRY_CONFIG_PROFILER
-
 #define ENTRY_IMPLEMENT_EVENT(_class, _type) \
 			_class(WindowHandle _handle) : Event(_type, _handle) {}
 
@@ -72,7 +42,7 @@ namespace entry
 		static void static_deallocate(void* _ptr, size_t /*_bytes*/);
 	};
 
-	int main(int _argc, const char* const* _argv);
+	int main();
 
 	char keyToAscii(Key::Enum _key, uint8_t _modifiers);
 
@@ -89,7 +59,6 @@ namespace entry
 			Size,
 			Window,
 			Suspend,
-			DropFile,
 		};
 
 		Event(Enum _type)
@@ -176,12 +145,6 @@ namespace entry
 		Suspend::Enum m_state;
 	};
 
-	struct DropFileEvent : public Event
-	{
-		ENTRY_IMPLEMENT_EVENT(DropFileEvent, Event::DropFile);
-
-		bx::FilePath m_filePath;
-	};
 
 	const Event* poll();
 	const Event* poll(WindowHandle _handle);
@@ -289,12 +252,6 @@ namespace entry
 			m_queue.push(ev);
 		}
 
-		void postDropFileEvent(WindowHandle _handle, const bx::FilePath& _filePath)
-		{
-			DropFileEvent* ev = BX_NEW(getAllocator(), DropFileEvent)(_handle);
-			ev->m_filePath = _filePath;
-			m_queue.push(ev);
-		}
 
 		const Event* poll()
 		{

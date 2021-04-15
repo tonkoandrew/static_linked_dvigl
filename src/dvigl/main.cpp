@@ -409,9 +409,6 @@ namespace entry
 
 	struct MainThreadEntry
 	{
-		int m_argc;
-		char** m_argv;
-
 		static int32_t threadFunc(bx::Thread* _thread, void* _userData);
 	};
 
@@ -597,11 +594,10 @@ namespace entry
 			initTranslateGamepadAxis(SDL_CONTROLLER_AXIS_TRIGGERRIGHT, GamepadAxis::RightZ);
 		}
 
-		int run(int _argc, char** _argv)
+		int run()
 		{
 			spdlog::info("Starting BGFX");
-			m_mte.m_argc = _argc;
-			m_mte.m_argv = _argv;
+			spdlog::info("Compiler:" BX_COMPILER_NAME " / " BX_CPU_NAME "-" BX_ARCH_NAME " / " BX_PLATFORM_NAME);
 
 			SDL_Init(SDL_INIT_EVERYTHING);
 // ===================================
@@ -657,44 +653,45 @@ namespace entry
     RGBAFormat.Aloss = 0;
 #endif
 
-    SDL_Surface* surf = IMG_Load("../res/textures/dirt_seamless.jpg");
-    if (!surf)
-    {
-        spdlog::error("IMG_Load error: {}", IMG_GetError());
-        // return 1;
-    } else {
-	    spdlog::debug("dirt_seamless {}x{}", surf->w, surf->h);
-	    SDL_FreeSurface(surf);
-    }
+    // SDL_Surface* surf;
 
-    surf = IMG_Load("../res/textures/elvis_face.png");
-    if (!surf)
-    {
-        spdlog::error("IMG_Load error: {}", IMG_GetError());
-        // return 1;
-    } else {
-    	spdlog::debug("elvis_face {}x{}", surf->w, surf->h);
-    	SDL_FreeSurface(surf);
-    }
+    // surf = IMG_Load("../res/textures/dirt_seamless.jpg");
+    // if (!surf)
+    // {
+    //     spdlog::error("IMG_Load error: {}", IMG_GetError());
+    // } else {
+	   //  spdlog::debug("dirt_seamless {}x{}", surf->w, surf->h);
+	   //  SDL_FreeSurface(surf);
+    // }
 
-    surf = IMG_Load("../res/textures/round_grill.tga");
-    if (!surf)
-    {
-        spdlog::error("IMG_Load error: {}", IMG_GetError());
-        // return 1;
-    } else {
-	    spdlog::debug("round_grill {}x{}", surf->w, surf->h);
-    }
+    // surf = IMG_Load("../res/textures/elvis_face.png");
+    // if (!surf)
+    // {
+    //     spdlog::error("IMG_Load error: {}", IMG_GetError());
+    //     // return 1;
+    // } else {
+    // 	spdlog::debug("elvis_face {}x{}", surf->w, surf->h);
+    // 	SDL_FreeSurface(surf);
+    // }
 
-    SDL_Surface* converted = NULL;
-    converted = SDL_ConvertSurface(surf, &RGBAFormat, SDL_SWSURFACE);
-    SDL_FreeSurface(surf);
+    // surf = IMG_Load("../res/textures/round_grill.tga");
+    // if (!surf)
+    // {
+    //     spdlog::error("IMG_Load error: {}", IMG_GetError());
+    //     // return 1;
+    // } else {
+	   //  spdlog::debug("round_grill {}x{}", surf->w, surf->h);
+    // }
 
-    if (!converted)
-    {
-        spdlog::error("SDL_ConvertSurface error: {}", SDL_GetError());
-        // return 1;
-    }
+    // SDL_Surface* converted = NULL;
+    // converted = SDL_ConvertSurface(surf, &RGBAFormat, SDL_SWSURFACE);
+    // SDL_FreeSurface(surf);
+
+    // if (!converted)
+    // {
+    //     spdlog::error("SDL_ConvertSurface error: {}", SDL_GetError());
+    // }
+
     // ========== sdl2 mixer ========================
     int mixerFlags = MIX_INIT_OGG |
     			MIX_INIT_MP3 |
@@ -714,13 +711,13 @@ namespace entry
         // return 1;
     }
 
-    music = Mix_LoadMUS("../res/audio/links_2_3_4.mp3");
-    if (music == NULL)
-    {
-    	spdlog::error("Failed to load music");
-    	// return 1;
-    }
-    Mix_PlayMusic(music, -1);
+    // music = Mix_LoadMUS("../res/audio/links_2_3_4.mp3");
+    // if (music == NULL)
+    // {
+    // 	spdlog::error("Failed to load music");
+    // 	// return 1;
+    // }
+    // Mix_PlayMusic(music, -1);
     // ========== sdl2 ttf ========================
     if (TTF_Init() == -1)
     {
@@ -834,31 +831,6 @@ namespace entry
 			// Force window resolution...
 			WindowHandle defaultWindow = { 0 };
 			setWindowSize(defaultWindow, m_width, m_height, true);
-
-			SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
-
-			bx::FileReaderI* reader = NULL;
-			while (NULL == reader)
-			{
-				reader = getFileReader();
-				bx::sleep(100);
-			}
-
-			if (bx::open(reader, "gamecontrollerdb.txt") )
-			{
-				bx::AllocatorI* allocator = getAllocator();
-				uint32_t size = (uint32_t)bx::getSize(reader);
-				void* data = BX_ALLOC(allocator, size + 1);
-				bx::read(reader, data, size);
-				bx::close(reader);
-				((char*)data)[size] = '\0';
-
-				if (SDL_GameControllerAddMapping( (char*)data) < 0) {
-					spdlog::debug("SDL game controller add mapping failed: {}", SDL_GetError());
-				}
-
-				BX_FREE(allocator, data);
-			}
 
 			bool exit = false;
 			SDL_Event event;
@@ -1147,18 +1119,6 @@ namespace entry
 						}
 						break;
 
-					case SDL_DROPFILE:
-						{
-							const SDL_DropEvent& dev = event.drop;
-							WindowHandle handle = defaultWindow; //findHandle(dev.windowID);
-							if (isValid(handle) )
-							{
-								m_eventQueue.postDropFileEvent(handle, dev.file);
-								SDL_free(dev.file);
-							}
-						}
-						break;
-
 					default:
 						{
 							const SDL_UserEvent& uev = event.user;
@@ -1293,7 +1253,7 @@ namespace entry
 
 			sdlDestroyWindow(m_window[0]);
 
-			Mix_FreeMusic(music);
+			// Mix_FreeMusic(music);
 			IMG_Quit();
 			TTF_Quit();
 		    SDLNet_Quit();
@@ -1480,7 +1440,7 @@ namespace entry
 		BX_UNUSED(_thread);
 
 		MainThreadEntry* self = (MainThreadEntry*)_userData;
-		int32_t result = main(self->m_argc, self->m_argv);
+		int32_t result = main();
 
 		SDL_Event event;
 		SDL_QuitEvent& qev = event.quit;
@@ -1494,7 +1454,7 @@ namespace entry
 __declspec(dllexport) int entrypoint(int _argc, char const *_argv[])
 {
 	using namespace entry;
-	return s_ctx.run(_argc, (char **) _argv);
+	return s_ctx.run();
 }
 
 
@@ -1515,7 +1475,7 @@ public:
 	ExampleHelloWorld()
 		: entry::AppI() {}
 
-	void init(int32_t _argc, const char* const* _argv, uint32_t _width, uint32_t _height) override
+	void init(uint32_t _width, uint32_t _height) override
 	{
 		m_width  = _width;
 		m_height = _height;
@@ -1527,6 +1487,7 @@ public:
 		init.resolution.width  = m_width;
 		init.resolution.height = m_height;
 		init.resolution.reset  = m_reset;
+
 		bgfx::init(init);
 
 switch (bgfx::getRendererType())
@@ -1627,9 +1588,9 @@ switch (bgfx::getRendererType())
 
 } // namespace
 
-int _main_(int _argc, char** _argv)
+int _main_()
 {
 	spdlog::set_level(spdlog::level::debug);
 	ExampleHelloWorld app;
-	return entry::runApp(&app, _argc, _argv);
+	return entry::runApp(&app);
 }
