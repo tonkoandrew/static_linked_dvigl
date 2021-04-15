@@ -109,11 +109,11 @@ set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS}
 # ===================== opengl ===========================================
 find_package(OpenGL REQUIRED)
 add_definitions(${OPENGL_DEFINITIONS})
-# ===================== glad ===========================================
-add_library(GLAD STATIC "src/glad.c")
-set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS}
-    GLAD
-)
+# # ===================== glad ===========================================
+# add_library(GLAD STATIC "src/glad.c")
+# set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS}
+#     GLAD
+# )
 # ===================== ozz ===========================================
 # add_subdirectory("C:\\Users\\yoda\\proj\\ozz-animation" "ozz-animation/")
 # set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
