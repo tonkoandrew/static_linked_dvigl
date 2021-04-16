@@ -14,6 +14,10 @@
 #include <yaml-cpp/yaml.h>
 
 
+#include "mainwindow.h"
+#include <QApplication>
+
+
 char* get_content(std::string file_name)
 {
     Sint64 bufferLength = 0;
@@ -107,5 +111,9 @@ int main(int argc, char* argv[])
 
     spdlog::debug("scene loaded, mNumMeshes is {}", scene->mNumMeshes);
 
-	return 0;
+
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.showMaximized();
+    return a.exec();
 }

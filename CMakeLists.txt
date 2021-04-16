@@ -160,7 +160,6 @@ set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS}
     spdlog::spdlog
     spdlog::spdlog_header_only
 )
-
 # ===================== BGFX ===========================================
 find_library(BGFX_LIBRARY
     NAMES bgfxRelease
@@ -205,6 +204,11 @@ find_package(yaml-cpp CONFIG REQUIRED)
 set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS}
     yaml-cpp
 )
+# ===================== qt5 ==========================================
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
+set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS}
+    Qt5::Widgets
+)
 # ========================================================================
 # ./bin/dvigl.dll - game engine runtime
 # ========================================================================
@@ -238,6 +242,12 @@ include_directories(${CMAKE_SOURCE_DIR}/includes )
 # ========================================================================
 set(NAME "editor")
 file(GLOB SOURCE "src/${NAME}/*.h" "src/${NAME}/*.cpp")
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+qt5_wrap_cpp(SOURCE src/${NAME}/mainwindow.h src/${NAME}/workerthread.h src/${NAME}/ui_mainwindow.h)
+# qt5_wrap_ui(SOURCE src/${NAME}/mainwindow.ui)
+
+
 add_executable(${NAME} ${SOURCE})
 if(WIN32)
     target_compile_options(${NAME} PRIVATE /MT)
