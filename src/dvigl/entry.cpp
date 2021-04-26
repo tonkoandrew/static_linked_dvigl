@@ -1,17 +1,6 @@
-/*
- * Copyright 2011-2021 Branimir Karadzic. All rights reserved.
- * License: https://github.com/bkaradzic/bgfx#license-bsd-2-clause
- */
-
-#include <bx/bx.h>
 #include <bgfx/bgfx.h>
 
 #include <time.h>
-
-#if BX_PLATFORM_EMSCRIPTEN
-#	include <emscripten.h>
-#endif // BX_PLATFORM_EMSCRIPTEN
-
 #include "entry_p.h"
 
 
@@ -162,7 +151,7 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 
 	WindowState s_window[ENTRY_CONFIG_MAX_WINDOWS];
 
-	bool processEvents(uint32_t& _width, uint32_t& _height, uint32_t& _debug, uint32_t& _reset, MouseState* _mouse)
+	bool processEvents(uint32_t& _width, uint32_t& _height, uint32_t& _debug, uint32_t& _reset)
 	{
 		bool needReset = s_reset != _reset;
 
@@ -200,12 +189,6 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 					}
 					break;
 
-				case Event::Window:
-					break;
-
-				case Event::Suspend:
-					break;
-
 				default:
 					break;
 				}
@@ -222,120 +205,12 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 		{
 			_reset = s_reset;
 			bgfx::reset(_width, _height, _reset);
-			// inputSetMouseResolution(uint16_t(_width), uint16_t(_height) );
 		}
 
 		_debug = s_debug;
 
 		s_width = _width;
 		s_height = _height;
-
-		return s_exit;
-	}
-
-	bool processWindowEvents(WindowState& _state, uint32_t& _debug, uint32_t& _reset)
-	{
-		bool needReset = s_reset != _reset;
-
-		s_debug = _debug;
-		s_reset = _reset;
-
-		WindowHandle handle = { UINT16_MAX };
-
-
-		const Event* ev;
-		do
-		{
-			struct SE
-			{
-				SE(WindowHandle _handle)
-					: m_ev(poll(_handle) )
-				{
-				}
-
-				~SE()
-				{
-					if (NULL != m_ev)
-					{
-						release(m_ev);
-					}
-				}
-
-				const Event* m_ev;
-
-			} scopeEvent(handle);
-			ev = scopeEvent.m_ev;
-
-			if (NULL != ev)
-			{
-				handle = ev->m_handle;
-				WindowState& win = s_window[handle.idx];
-
-				switch (ev->m_type)
-				{
-				case Event::Axis:
-					{
-						const AxisEvent* axis = static_cast<const AxisEvent*>(ev);
-						// inputSetGamepadAxis(axis->m_gamepad, axis->m_axis, axis->m_value);
-					}
-					break;
-
-				case Event::Char:
-					{
-						const CharEvent* chev = static_cast<const CharEvent*>(ev);
-						win.m_handle = chev->m_handle;
-					// 	inputChar(chev->m_len, chev->m_char);
-					}
-					break;
-
-				case Event::Exit:
-					return true;
-
-				case Event::Size:
-					{
-						const SizeEvent* size = static_cast<const SizeEvent*>(ev);
-						win.m_handle = size->m_handle;
-						win.m_width  = size->m_width;
-						win.m_height = size->m_height;
-
-						needReset = win.m_handle.idx == 0 ? true : needReset;
-					}
-					break;
-
-				case Event::Window:
-					{
-						const WindowEvent* window = static_cast<const WindowEvent*>(ev);
-						win.m_handle = window->m_handle;
-						win.m_nwh    = window->m_nwh;
-						ev = NULL;
-					}
-					break;
-
-				case Event::Suspend:
-					break;
-
-				default:
-					break;
-				}
-			}
-
-		} while (NULL != ev);
-
-		if (isValid(handle) )
-		{
-			WindowState& win = s_window[handle.idx];
-			_state = win;
-		}
-
-		needReset |= _reset != s_reset;
-
-		if (needReset)
-		{
-			_reset = s_reset;
-			bgfx::reset(s_window[0].m_width, s_window[0].m_height, _reset);
-		}
-
-		_debug = s_debug;
 
 		return s_exit;
 	}
