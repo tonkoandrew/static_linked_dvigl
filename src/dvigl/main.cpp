@@ -589,15 +589,6 @@ namespace entry
                                 }
                                 break;
 
-                            case SDL_USER_WINDOW_SET_POS:
-                                {
-                                    WindowHandle handle = getWindowHandle(uev);
-                                    Msg* msg = (Msg*)uev.data2;
-                                    SDL_SetWindowPosition(m_window[handle.idx], msg->m_x, msg->m_y);
-                                    delete msg;
-                                }
-                                break;
-
                             case SDL_USER_WINDOW_SET_SIZE:
                                 {
                                     WindowHandle handle = getWindowHandle(uev);
@@ -609,32 +600,6 @@ namespace entry
                                     delete msg;
                                 }
                                 break;
-
-                            case SDL_USER_WINDOW_TOGGLE_FRAME:
-                                {
-                                    WindowHandle handle = getWindowHandle(uev);
-                                    if (isValid(handle) )
-                                    {
-                                        m_flags[handle.idx] ^= ENTRY_WINDOW_FLAG_FRAME;
-                                        SDL_SetWindowBordered(m_window[handle.idx], (SDL_bool)!!(m_flags[handle.idx] & ENTRY_WINDOW_FLAG_FRAME) );
-                                    }
-                                }
-                                break;
-
-                            case SDL_USER_WINDOW_TOGGLE_FULL_SCREEN:
-                                {
-                                    WindowHandle handle = getWindowHandle(uev);
-                                    m_fullscreen = !m_fullscreen;
-                                    SDL_SetWindowFullscreen(m_window[handle.idx], m_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
-                                }
-                                break;
-
-                            // case SDL_USER_WINDOW_MOUSE_LOCK:
-                            //     {
-                            //         SDL_SetRelativeMouseMode(!!uev.code ? SDL_TRUE : SDL_FALSE);
-                            //     }
-                            //     break;
-
                             default:
                                 break;
                             }
@@ -768,15 +733,6 @@ namespace entry
         }
     }
 
-    void setWindowPos(WindowHandle _handle, int32_t _x, int32_t _y)
-    {
-        Msg* msg = new Msg;
-        msg->m_x = _x;
-        msg->m_y = _y;
-
-        sdlPostEvent(SDL_USER_WINDOW_SET_POS, _handle, msg);
-    }
-
     void setWindowSize(WindowHandle _handle, uint32_t _width, uint32_t _height)
     {
         Msg* msg = new Msg;
@@ -818,19 +774,22 @@ namespace entry
 
 } // namespace entry
 
+
+
+
+
+
+
+
+
+
+
+
 __declspec(dllexport) int dvigl_init(int _argc, char const *_argv[])
 {
     using namespace entry;
     return s_ctx.run();
 }
-
-
-
-
-
-
-
-
 
 
 namespace
@@ -887,13 +846,6 @@ switch (bgfx::getRendererType())
     spdlog::critical("test critical");
     spdlog::error("test error {}, {:.2f}", 42, 42.0f);
 
-    // spdlog::set_level(spdlog::level::warn);
-    // spdlog::debug("This message should not be displayed..");    
-    // spdlog::set_level(spdlog::level::debug);
-    // spdlog::debug("This message should be displayed..");    
-
-
-
         bgfx::setDebug(m_debug);
 
         // Set view 0 clear state.
@@ -903,11 +855,6 @@ switch (bgfx::getRendererType())
             , 1.0f
             , 0
             );
-
-
-
-
-
     }
 
     virtual int shutdown() override
@@ -920,7 +867,7 @@ switch (bgfx::getRendererType())
     bool update() override
     {
         static int clearColor = 0x303030ff;
-        clearColor += 256;
+        clearColor += 1024 + 256;
 
 
         if (!entry::processEvents(m_width, m_height, m_debug, m_reset) )

@@ -41,7 +41,6 @@ namespace entry
 
 	WindowHandle createWindow(int32_t _x, int32_t _y, uint32_t _width, uint32_t _height, uint32_t _flags = ENTRY_WINDOW_FLAG_NONE, const char* _title = "");
 	void destroyWindow(WindowHandle _handle);
-	void setWindowPos(WindowHandle _handle, int32_t _x, int32_t _y);
 	void setWindowSize(WindowHandle _handle, uint32_t _width, uint32_t _height);
 	void setWindowTitle(WindowHandle _handle, const char* _title);
 	void setWindowFlags(WindowHandle _handle, uint32_t _flags, bool _enabled);
@@ -81,32 +80,7 @@ namespace entry
 
 		///
 		virtual bool update() = 0;
-
-		///
-		const char* getName() const;
-
-		///
-		const char* getDescription() const;
-
-		///
-		const char* getUrl() const;
-
-		///
-		AppI* getNext();
-
-		AppI* m_next;
-
-	private:
-		const char* m_name;
-		const char* m_description;
-		const char* m_url;
 	};
-
-	///
-	AppI* getFirstApp();
-
-	///
-	uint32_t getNumApps();
 
 	///
 	int runApp(AppI* _app);

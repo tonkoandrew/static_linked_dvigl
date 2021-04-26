@@ -33,94 +33,13 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 	static AppI*    s_apps       = NULL;
 	static uint32_t s_numApps    = 0;
 
-	static AppI* getCurrentApp(AppI* _set = NULL)
-	{
-		if (NULL != _set)
-		{
-			s_currentApp = _set;
-		}
-		else if (NULL == s_currentApp)
-		{
-			s_currentApp = getFirstApp();
-		}
-
-		return s_currentApp;
-	}
-
-	static AppI* getNextWrap(AppI* _app)
-	{
-		AppI* next = _app->getNext();
-		if (NULL != next)
-		{
-			return next;
-		}
-
-		return getFirstApp();
-	}
-
 	AppI::AppI()
 	{
-		m_name        = "_name";
-		m_description = "_description";
-		m_url         = "_url";
-		m_next        = s_apps;
-
 		s_apps = this;
-		s_numApps++;
 	}
 
 	AppI::~AppI()
 	{
-		for (AppI* prev = NULL, *app = s_apps, *next = app->getNext()
-			; NULL != app
-			; prev = app, app = next, next = app->getNext() )
-		{
-			if (app == this)
-			{
-				if (NULL != prev)
-				{
-					prev->m_next = next;
-				}
-				else
-				{
-					s_apps = next;
-				}
-
-				--s_numApps;
-
-				break;
-			}
-		}
-	}
-
-	const char* AppI::getName() const
-	{
-		return m_name;
-	}
-
-	const char* AppI::getDescription() const
-	{
-		return m_description;
-	}
-
-	const char* AppI::getUrl() const
-	{
-		return m_url;
-	}
-
-	AppI* AppI::getNext()
-	{
-		return m_next;
-	}
-
-	AppI* getFirstApp()
-	{
-		return s_apps;
-	}
-
-	uint32_t getNumApps()
-	{
-		return s_numApps;
 	}
 
 	int runApp(AppI* _app)
@@ -193,9 +112,6 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 					break;
 				}
 			}
-
-			// inputProcess();
-
 		} while (NULL != ev);
 
 		needReset |= _reset != s_reset;
