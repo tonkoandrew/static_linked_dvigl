@@ -58,8 +58,6 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 	int main()
 	{
 		entry::WindowHandle defaultWindow = { 0 };
-
-		entry::setWindowTitle(defaultWindow, "BGFX -> SDL Window");
 		setWindowSize(defaultWindow, ENTRY_DEFAULT_WIDTH, ENTRY_DEFAULT_HEIGHT);
 
 		int32_t result = bx::kExitSuccess;
@@ -68,7 +66,7 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 		return result;
 	}
 
-	WindowState s_window[ENTRY_CONFIG_MAX_WINDOWS];
+	WindowState s_window;
 
 	bool processEvents(uint32_t& _width, uint32_t& _height, uint32_t& _debug, uint32_t& _reset)
 	{
@@ -95,7 +93,7 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 				case Event::Size:
 					{
 						const SizeEvent* size = static_cast<const SizeEvent*>(ev);
-						WindowState& win = s_window[0];
+						WindowState& win = s_window;
 						win.m_handle = size->m_handle;
 						win.m_width  = size->m_width;
 						win.m_height = size->m_height;

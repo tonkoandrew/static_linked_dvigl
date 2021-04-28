@@ -49,30 +49,30 @@ BX_PRAGMA_DIAGNOSTIC_POP()
 
 
 
-#include "ozz/animation/runtime/animation.h"
-#include "ozz/animation/runtime/skeleton.h"
-#include "ozz/animation/runtime/sampling_job.h"
-#include "ozz/base/containers/vector.h"
-#include "ozz/base/maths/soa_transform.h"
+// #include "ozz/animation/runtime/animation.h"
+// #include "ozz/animation/runtime/skeleton.h"
+// #include "ozz/animation/runtime/sampling_job.h"
+// #include "ozz/base/containers/vector.h"
+// #include "ozz/base/maths/soa_transform.h"
 
-#include "ozz/base/maths/box.h"
-#include "ozz/base/maths/simd_quaternion.h"
-#include "ozz/base/memory/allocator.h"
-#include "ozz/animation/runtime/track.h"
-#include "ozz/animation/offline/raw_skeleton.h"
-#include "ozz/animation/runtime/local_to_model_job.h"
-#include "ozz/base/io/archive.h"
-#include "ozz/base/io/stream.h"
-#include "ozz/base/log.h"
-#include "ozz/base/maths/math_ex.h"
-#include "ozz/base/maths/simd_math.h"
-#include "ozz/base/maths/vec_float.h"
-#include "ozz/base/io/archive_traits.h"
-#include "ozz/base/platform.h"
-#include "ozz/base/containers/vector_archive.h"
-#include "ozz/base/maths/math_archive.h"
-#include "ozz/base/maths/simd_math_archive.h"
-#include "ozz/geometry/runtime/skinning_job.h"
+// #include "ozz/base/maths/box.h"
+// #include "ozz/base/maths/simd_quaternion.h"
+// #include "ozz/base/memory/allocator.h"
+// #include "ozz/animation/runtime/track.h"
+// #include "ozz/animation/offline/raw_skeleton.h"
+// #include "ozz/animation/runtime/local_to_model_job.h"
+// #include "ozz/base/io/archive.h"
+// #include "ozz/base/io/stream.h"
+// #include "ozz/base/log.h"
+// #include "ozz/base/maths/math_ex.h"
+// #include "ozz/base/maths/simd_math.h"
+// #include "ozz/base/maths/vec_float.h"
+// #include "ozz/base/io/archive_traits.h"
+// #include "ozz/base/platform.h"
+// #include "ozz/base/containers/vector_archive.h"
+// #include "ozz/base/maths/math_archive.h"
+// #include "ozz/base/maths/simd_math_archive.h"
+// #include "ozz/geometry/runtime/skinning_job.h"
 
 
 
@@ -97,47 +97,47 @@ struct fmt::formatter<tinystl::string>
 };
 
 
-bool LoadSkeleton(const char* _filename, ozz::animation::Skeleton* _skeleton)
-{
-    assert(_filename && _skeleton);
-    spdlog::debug("Loading skeleton archive {}.", _filename);
-    ozz::io::File file(_filename, "rb");
-    if (!file.opened()) {
-        spdlog::error("Failed to open skeleton file {}.", _filename);
-        return false;
-    }
-    ozz::io::IArchive archive(&file);
-    if (!archive.TestTag<ozz::animation::Skeleton>()) {
-        spdlog::error("Failed to load skeleton instance from file {}.", _filename);
-        return false;
-    }
+// bool LoadSkeleton(const char* _filename, ozz::animation::Skeleton* _skeleton)
+// {
+//     assert(_filename && _skeleton);
+//     spdlog::debug("Loading skeleton archive {}.", _filename);
+//     ozz::io::File file(_filename, "rb");
+//     if (!file.opened()) {
+//         spdlog::error("Failed to open skeleton file {}.", _filename);
+//         return false;
+//     }
+//     ozz::io::IArchive archive(&file);
+//     if (!archive.TestTag<ozz::animation::Skeleton>()) {
+//         spdlog::error("Failed to load skeleton instance from file {}.", _filename);
+//         return false;
+//     }
 
-    // Once the tag is validated, reading cannot fail.
-    archive >> *_skeleton;
-    return true;
-}
+//     // Once the tag is validated, reading cannot fail.
+//     archive >> *_skeleton;
+//     return true;
+// }
 
 
-bool LoadAnimation(const char* _filename,
-                   ozz::animation::Animation* _animation)
-{
-    assert(_filename && _animation);
-    spdlog::debug("Loading animation archive: {}.", _filename);
-    ozz::io::File file(_filename, "rb");
-    if (!file.opened()) {
-        spdlog::error("Failed to open animation file {}.", _filename);
-        return false;
-    }
-    ozz::io::IArchive archive(&file);
-    if (!archive.TestTag<ozz::animation::Animation>()) {
-        spdlog::error("Failed to load animation instance from file {}.", _filename);
-        return false;
-    }
+// bool LoadAnimation(const char* _filename,
+//                    ozz::animation::Animation* _animation)
+// {
+//     assert(_filename && _animation);
+//     spdlog::debug("Loading animation archive: {}.", _filename);
+//     ozz::io::File file(_filename, "rb");
+//     if (!file.opened()) {
+//         spdlog::error("Failed to open animation file {}.", _filename);
+//         return false;
+//     }
+//     ozz::io::IArchive archive(&file);
+//     if (!archive.TestTag<ozz::animation::Animation>()) {
+//         spdlog::error("Failed to load animation instance from file {}.", _filename);
+//         return false;
+//     }
 
-    // Once the tag is validated, reading cannot fail.
-    archive >> *_animation;
-    return true;
-}
+//     // Once the tag is validated, reading cannot fail.
+//     archive >> *_animation;
+//     return true;
+// }
 
 
 namespace entry
@@ -237,7 +237,6 @@ namespace entry
             , m_width(0)
             , m_height(0)
             , m_flags(0)
-            , m_flagsEnabled(false)
         {
         }
 
@@ -246,8 +245,6 @@ namespace entry
         uint32_t m_width;
         uint32_t m_height;
         uint32_t m_flags;
-        tinystl::string m_title;
-        bool m_flagsEnabled;
     };
 
     static uint32_t s_userEventStart;
@@ -255,7 +252,7 @@ namespace entry
     enum SDL_USER_WINDOW
     {
         SDL_USER_WINDOW_DESTROY,
-        SDL_USER_WINDOW_SET_TITLE,
+
         SDL_USER_WINDOW_SET_FLAGS,
         SDL_USER_WINDOW_SET_POS,
         SDL_USER_WINDOW_SET_SIZE,
@@ -398,8 +395,8 @@ namespace entry
     tinystl::string animation = "../res/models/animation.ozz";
     // tinystl::string mesh = "../res/models/mesh.ozz";
 
-    ozz::animation::Skeleton m_skeleton;
-    ozz::animation::Animation m_animation;
+    // ozz::animation::Skeleton m_skeleton;
+    // ozz::animation::Animation m_animation;
 
     // ozz::vector<dvigl::Mesh> m_meshes;
 
@@ -437,7 +434,7 @@ namespace entry
             // SDL_SetWindowIcon(m_window, icon);
 
 
-            m_flags[0] = 0
+            m_flags = 0
                 | ENTRY_WINDOW_FLAG_ASPECT_RATIO
                 | ENTRY_WINDOW_FLAG_FRAME
                 ;
@@ -514,47 +511,6 @@ namespace entry
                             const SDL_UserEvent& uev = event.user;
                             switch (uev.type - s_userEventStart)
                             {
-                            case SDL_USER_WINDOW_DESTROY:
-                                {
-                                    WindowHandle handle = getWindowHandle(uev);
-                                    if (isValid(handle) )
-                                    {
-                                        m_eventQueue.postWindowEvent(handle);
-                                        sdlDestroyWindow(m_window);
-                                        m_window = NULL;
-                                    }
-                                }
-                                break;
-
-                            case SDL_USER_WINDOW_SET_TITLE:
-                                {
-                                    WindowHandle handle = getWindowHandle(uev);
-                                    Msg* msg = (Msg*)uev.data2;
-                                    if (isValid(handle) )
-                                    {
-                                        SDL_SetWindowTitle(m_window, msg->m_title.c_str() );
-                                    }
-                                    delete msg;
-                                }
-                                break;
-
-                            case SDL_USER_WINDOW_SET_FLAGS:
-                                {
-                                    WindowHandle handle = getWindowHandle(uev);
-                                    Msg* msg = (Msg*)uev.data2;
-
-                                    if (msg->m_flagsEnabled)
-                                    {
-                                        m_flags[handle.idx] |= msg->m_flags;
-                                    }
-                                    else
-                                    {
-                                        m_flags[handle.idx] &= ~msg->m_flags;
-                                    }
-
-                                    delete msg;
-                                }
-                                break;
 
                             case SDL_USER_WINDOW_SET_SIZE:
                                 {
@@ -636,7 +592,7 @@ namespace entry
 
         bx::HandleAllocT<ENTRY_CONFIG_MAX_WINDOWS> m_windowAlloc;
         SDL_Window* m_window;
-        uint32_t m_flags[ENTRY_CONFIG_MAX_WINDOWS];
+        uint32_t m_flags;
 
         uint32_t m_width;
         uint32_t m_height;
@@ -651,25 +607,9 @@ namespace entry
         return s_ctx.m_eventQueue.poll();
     }
 
-    const Event* poll(WindowHandle _handle)
-    {
-        return s_ctx.m_eventQueue.poll(_handle);
-    }
-
     void release(const Event* _event)
     {
         s_ctx.m_eventQueue.release(_event);
-    }
-
-    void destroyWindow(WindowHandle _handle)
-    {
-        if (UINT16_MAX != _handle.idx)
-        {
-            sdlPostEvent(SDL_USER_WINDOW_DESTROY, _handle);
-
-            bx::MutexScope scope(s_ctx.m_lock);
-            s_ctx.m_windowAlloc.free(_handle.idx);
-        }
     }
 
     void setWindowSize(WindowHandle _handle, uint32_t _width, uint32_t _height)
@@ -679,22 +619,6 @@ namespace entry
         msg->m_height = _height;
 
         sdlPostEvent(SDL_USER_WINDOW_SET_SIZE, _handle, msg);
-    }
-
-    void setWindowTitle(WindowHandle _handle, const char* _title)
-    {
-        Msg* msg = new Msg;
-        msg->m_title = _title;
-
-        sdlPostEvent(SDL_USER_WINDOW_SET_TITLE, _handle, msg);
-    }
-
-    void setWindowFlags(WindowHandle _handle, uint32_t _flags, bool _enabled)
-    {
-        Msg* msg = new Msg;
-        msg->m_flags = _flags;
-        msg->m_flagsEnabled = _enabled;
-        sdlPostEvent(SDL_USER_WINDOW_SET_FLAGS, _handle, msg);
     }
 
     int32_t MainThreadEntry::threadFunc(bx::Thread* _thread, void* _userData)

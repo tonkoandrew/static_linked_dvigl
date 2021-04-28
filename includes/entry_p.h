@@ -13,7 +13,7 @@
 #include "entry.h"
 
 #ifndef ENTRY_CONFIG_MAX_WINDOWS
-#	define ENTRY_CONFIG_MAX_WINDOWS 8
+#	define ENTRY_CONFIG_MAX_WINDOWS 1
 #endif // ENTRY_CONFIG_MAX_WINDOWS
 
 #if !defined(ENTRY_DEFAULT_WIDTH) && !defined(ENTRY_DEFAULT_HEIGHT)
@@ -47,7 +47,6 @@ namespace entry
 			Exit,
 			Size,
 			Window,
-			// Suspend,
 		};
 
 		Event(Enum _type)
@@ -81,16 +80,7 @@ namespace entry
 		void* m_nwh;
 	};
 
-	// struct SuspendEvent : public Event
-	// {
-	// 	ENTRY_IMPLEMENT_EVENT(SuspendEvent, Event::Suspend);
-
-	// 	Suspend::Enum m_state;
-	// };
-
-
 	const Event* poll();
-	const Event* poll(WindowHandle _handle);
 	void release(const Event* _event);
 
 	class EventQueue
@@ -122,39 +112,9 @@ namespace entry
 			m_queue.push(ev);
 		}
 
-		void postWindowEvent(WindowHandle _handle, void* _nwh = NULL)
-		{
-			WindowEvent* ev = BX_NEW(getAllocator(), WindowEvent)(_handle);
-			ev->m_nwh = _nwh;
-			m_queue.push(ev);
-		}
-
-		// void postSuspendEvent(WindowHandle _handle, Suspend::Enum _state)
-		// {
-		// 	SuspendEvent* ev = BX_NEW(getAllocator(), SuspendEvent)(_handle);
-		// 	ev->m_state = _state;
-		// 	m_queue.push(ev);
-		// }
-
-
 		const Event* poll()
 		{
 			return m_queue.pop();
-		}
-
-		const Event* poll(WindowHandle _handle)
-		{
-			if (isValid(_handle) )
-			{
-				Event* ev = m_queue.peek();
-				if (NULL == ev
-				||  ev->m_handle.idx != _handle.idx)
-				{
-					return NULL;
-				}
-			}
-
-			return poll();
 		}
 
 		void release(const Event* _event) const
