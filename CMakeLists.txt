@@ -20,17 +20,6 @@ if(NOT CMAKE_BUILD_TYPE)
     )
 endif()
 
-# if(WIN32)
-# else()
-#     set(OpenGL_GL_PREFERENCE GLVND
-#         CACHE STRING
-#         "Linux-only: if GLVND, use the vendor-neutral GL libraries (default)."
-#     )
-#     set_property(CACHE OpenGL_GL_PREFERENCE PROPERTY STRINGS GLVND LEGACY)
-# endif()
-
-# find_package(Threads REQUIRED)
-
 if(WIN32)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 endif(WIN32)

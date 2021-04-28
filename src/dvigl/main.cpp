@@ -254,7 +254,6 @@ namespace entry
 
     enum SDL_USER_WINDOW
     {
-        SDL_USER_WINDOW_CREATE,
         SDL_USER_WINDOW_DESTROY,
         SDL_USER_WINDOW_SET_TITLE,
         SDL_USER_WINDOW_SET_FLAGS,
@@ -292,12 +291,6 @@ namespace entry
         Context()
             : m_width(ENTRY_DEFAULT_WIDTH)
             , m_height(ENTRY_DEFAULT_HEIGHT)
-            , m_aspectRatio(16.0f/9.0f)
-            , m_mx(0)
-            , m_my(0)
-            , m_mz(0)
-            // , m_mouseLock(false)
-            , m_fullscreen(false)
         {
             spdlog::set_level(spdlog::level::debug);
         }
@@ -326,17 +319,17 @@ namespace entry
                 MIX_INIT_FLAC |
                 MIX_INIT_MID;
     result = Mix_Init(mixerFlags);
-    if (!(result & mixerFlags))
-    {
-        spdlog::error("Mix_Init: Failed to init required ogg and mod support!");
-        spdlog::error("Mix_Init: {}", Mix_GetError());
-    }
+    // if (!(result & mixerFlags))
+    // {
+    //     spdlog::error("Mix_Init: Failed to init required ogg and mod support!");
+    //     spdlog::error("Mix_Init: {}", Mix_GetError());
+    // }
 
-    if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
-    {
-        spdlog::error("Mix_OpenAudio failed");
-        // return 1;
-    }
+    // if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
+    // {
+    //     spdlog::error("Mix_OpenAudio failed");
+    //     // return 1;
+    // }
 
     // music = Mix_LoadMUS("../res/audio/links_2_3_4.mp3");
     // if (music == NULL)
@@ -351,21 +344,22 @@ namespace entry
         spdlog::error("TTF_Init error: {}", TTF_GetError());
         // return 1;
     }
-    auto f = TTF_OpenFont("../res/fonts/SourceCodePro-Regular.ttf", 24);
-    if (!f)
-    {
-        spdlog::error("TTF_OpenFont error: {}", TTF_GetError());
-    }
-    SDL_Color color = {255, 255, 255};
-    SDL_Surface* text_surf = TTF_RenderUTF8_Blended(f, "Hello world", color);
-    if (!text_surf)
-    {
-        spdlog::error("TTF_RenderUTF8_Blended error: {}", TTF_GetError());
-        // return NULL;
-    }
-    spdlog::debug("Hello world text_surf {}x{}", text_surf->w, text_surf->h);
 
-    TTF_CloseFont(f);
+    // auto f = TTF_OpenFont("../res/fonts/SourceCodePro-Regular.ttf", 24);
+    // if (!f)
+    // {
+    //     spdlog::error("TTF_OpenFont error: {}", TTF_GetError());
+    // }
+    // SDL_Color color = {255, 255, 255};
+    // SDL_Surface* text_surf = TTF_RenderUTF8_Blended(f, "Hello world", color);
+    // if (!text_surf)
+    // {
+    //     spdlog::error("TTF_RenderUTF8_Blended error: {}", TTF_GetError());
+    //     // return NULL;
+    // }
+    // spdlog::debug("Hello world text_surf {}x{}", text_surf->w, text_surf->h);
+
+    // TTF_CloseFont(f);
     // ========================== EnTT and glm ================================
     struct TransformComponent
     {
@@ -409,16 +403,16 @@ namespace entry
 
     // ozz::vector<dvigl::Mesh> m_meshes;
 
-    // Reading skeleton.
-    if (!LoadSkeleton(skeleton.c_str(), &m_skeleton)) {
-        spdlog::error("Failed to load skeleton {}", skeleton);
-    }
-    spdlog::debug("Loaded skeleton from {}", skeleton);
+    // // Reading skeleton.
+    // if (!LoadSkeleton(skeleton.c_str(), &m_skeleton)) {
+    //     spdlog::error("Failed to load skeleton {}", skeleton);
+    // }
+    // spdlog::debug("Loaded skeleton from {}", skeleton);
 
-    // Reading animation.
-    if (!LoadAnimation(animation.c_str(), &m_animation)) {
-        spdlog::error("Failed to load animation {}", animation);
-    }
+    // // Reading animation.
+    // if (!LoadAnimation(animation.c_str(), &m_animation)) {
+    //     spdlog::error("Failed to load animation {}", animation);
+    // }
 
  //    // Reading skinned meshes.
  //    if (!LoadMeshes(mesh.c_str(), &m_meshes)) {
@@ -430,7 +424,7 @@ namespace entry
 
 
             m_windowAlloc.alloc();
-            m_window[0] = SDL_CreateWindow("bgfx"
+            m_window = SDL_CreateWindow("bgfx"
                             , SDL_WINDOWPOS_UNDEFINED
                             , SDL_WINDOWPOS_UNDEFINED
                             , m_width
@@ -440,7 +434,7 @@ namespace entry
                             );
 
             // SDL_Surface* icon = IMG_Load("../res/icons/icon.png");
-            // SDL_SetWindowIcon(m_window[0], icon);
+            // SDL_SetWindowIcon(m_window, icon);
 
 
             m_flags[0] = 0
@@ -450,7 +444,7 @@ namespace entry
 
             s_userEventStart = SDL_RegisterEvents(7);
 
-            sdlSetWindow(m_window[0]);
+            sdlSetWindow(m_window);
             bgfx::renderFrame();
 
             m_thread.init(MainThreadEntry::threadFunc, &m_mte);
@@ -520,41 +514,14 @@ namespace entry
                             const SDL_UserEvent& uev = event.user;
                             switch (uev.type - s_userEventStart)
                             {
-                            case SDL_USER_WINDOW_CREATE:
-                                {
-                                    WindowHandle handle = getWindowHandle(uev);
-                                    Msg* msg = (Msg*)uev.data2;
-
-                                    m_window[handle.idx] = SDL_CreateWindow(msg->m_title.c_str()
-                                        , msg->m_x
-                                        , msg->m_y
-                                        , msg->m_width
-                                        , msg->m_height
-                                        , SDL_WINDOW_SHOWN
-                                        | SDL_WINDOW_RESIZABLE
-                                        );
-
-                                    m_flags[handle.idx] = msg->m_flags;
-
-                                    void* nwh = sdlNativeWindowHandle(m_window[handle.idx]);
-                                    if (NULL != nwh)
-                                    {
-                                        m_eventQueue.postSizeEvent(handle, msg->m_width, msg->m_height);
-                                        m_eventQueue.postWindowEvent(handle, nwh);
-                                    }
-
-                                    delete msg;
-                                }
-                                break;
-
                             case SDL_USER_WINDOW_DESTROY:
                                 {
                                     WindowHandle handle = getWindowHandle(uev);
                                     if (isValid(handle) )
                                     {
                                         m_eventQueue.postWindowEvent(handle);
-                                        sdlDestroyWindow(m_window[handle.idx]);
-                                        m_window[handle.idx] = NULL;
+                                        sdlDestroyWindow(m_window);
+                                        m_window = NULL;
                                     }
                                 }
                                 break;
@@ -565,7 +532,7 @@ namespace entry
                                     Msg* msg = (Msg*)uev.data2;
                                     if (isValid(handle) )
                                     {
-                                        SDL_SetWindowTitle(m_window[handle.idx], msg->m_title.c_str() );
+                                        SDL_SetWindowTitle(m_window, msg->m_title.c_str() );
                                     }
                                     delete msg;
                                 }
@@ -612,7 +579,7 @@ namespace entry
             while (bgfx::RenderFrame::NoContext != bgfx::renderFrame() ) {};
             m_thread.shutdown();
 
-            sdlDestroyWindow(m_window[0]);
+            sdlDestroyWindow(m_window);
 
             // Mix_FreeMusic(music);
             // IMG_Quit();
@@ -636,7 +603,7 @@ namespace entry
             for (uint32_t ii = 0, num = m_windowAlloc.getNumHandles(); ii < num; ++ii)
             {
                 uint16_t idx = m_windowAlloc.getHandleAt(ii);
-                if (_window == m_window[idx])
+                if (_window == m_window)
                 {
                     WindowHandle handle = { idx };
                     return handle;
@@ -656,7 +623,7 @@ namespace entry
                 m_width  = _width;
                 m_height = _height;
 
-                SDL_SetWindowSize(m_window[_handle.idx], m_width, m_height);
+                SDL_SetWindowSize(m_window, m_width, m_height);
                 m_eventQueue.postSizeEvent(_handle, m_width, m_height);
             }
         }
@@ -668,18 +635,11 @@ namespace entry
         bx::Mutex m_lock;
 
         bx::HandleAllocT<ENTRY_CONFIG_MAX_WINDOWS> m_windowAlloc;
-        SDL_Window* m_window[ENTRY_CONFIG_MAX_WINDOWS];
+        SDL_Window* m_window;
         uint32_t m_flags[ENTRY_CONFIG_MAX_WINDOWS];
 
         uint32_t m_width;
         uint32_t m_height;
-        float m_aspectRatio;
-
-        int32_t m_mx;
-        int32_t m_my;
-        int32_t m_mz;
-        // bool m_mouseLock;
-        bool m_fullscreen;
 
         Mix_Music* music;
     };
@@ -699,27 +659,6 @@ namespace entry
     void release(const Event* _event)
     {
         s_ctx.m_eventQueue.release(_event);
-    }
-
-    WindowHandle createWindow(int32_t _x, int32_t _y, uint32_t _width, uint32_t _height, uint32_t _flags, const char* _title)
-    {
-        bx::MutexScope scope(s_ctx.m_lock);
-        WindowHandle handle = { s_ctx.m_windowAlloc.alloc() };
-
-        if (UINT16_MAX != handle.idx)
-        {
-            Msg* msg = new Msg;
-            msg->m_x      = _x;
-            msg->m_y      = _y;
-            msg->m_width  = _width;
-            msg->m_height = _height;
-            msg->m_title  = _title;
-            msg->m_flags  = _flags;
-
-            sdlPostEvent(SDL_USER_WINDOW_CREATE, handle, msg);
-        }
-
-        return handle;
     }
 
     void destroyWindow(WindowHandle _handle)
