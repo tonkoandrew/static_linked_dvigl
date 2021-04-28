@@ -25,7 +25,7 @@ BX_PRAGMA_DIAGNOSTIC_POP()
 
 #include <bx/thread.h>
 #include <bx/handlealloc.h>
-#include <tinystl/allocator.h>
+// #include <tinystl/allocator.h>
 #include <tinystl/string.h>
 
 
@@ -301,21 +301,21 @@ namespace entry
 // ===================================
             // ========== sdl2 net ========================
 
-    int result = SDLNet_Init();
+    // int result = SDLNet_Init();
 
-    if (result)
-    {
-        spdlog::error("SDLNet_Init: {}", SDLNet_GetError());
-        // return result;
-    }
+    // if (result)
+    // {
+    //     spdlog::error("SDLNet_Init: {}", SDLNet_GetError());
+    //     // return result;
+    // }
 
     // ========== sdl2 mixer ========================
-    int mixerFlags = MIX_INIT_OGG |
-                MIX_INIT_MP3 |
-                MIX_INIT_OPUS |
-                MIX_INIT_FLAC |
-                MIX_INIT_MID;
-    result = Mix_Init(mixerFlags);
+    // int mixerFlags = MIX_INIT_OGG |
+    //             MIX_INIT_MP3 |
+    //             MIX_INIT_OPUS |
+    //             MIX_INIT_FLAC |
+    //             MIX_INIT_MID;
+    // result = Mix_Init(mixerFlags);
     // if (!(result & mixerFlags))
     // {
     //     spdlog::error("Mix_Init: Failed to init required ogg and mod support!");
@@ -336,11 +336,11 @@ namespace entry
     // }
     // Mix_PlayMusic(music, -1);
     // ========== sdl2 ttf ========================
-    if (TTF_Init() == -1)
-    {
-        spdlog::error("TTF_Init error: {}", TTF_GetError());
-        // return 1;
-    }
+    // if (TTF_Init() == -1)
+    // {
+    //     spdlog::error("TTF_Init error: {}", TTF_GetError());
+    //     // return 1;
+    // }
 
     // auto f = TTF_OpenFont("../res/fonts/SourceCodePro-Regular.ttf", 24);
     // if (!f)
@@ -539,8 +539,8 @@ namespace entry
 
             // Mix_FreeMusic(music);
             // IMG_Quit();
-            TTF_Quit();
-            SDLNet_Quit();
+            // TTF_Quit();
+            // SDLNet_Quit();
 
             SDL_Quit();
 
@@ -709,6 +709,7 @@ switch (bgfx::getRendererType())
     spdlog::critical("test critical");
     spdlog::error("test error {}, {:.2f}", 42, 42.0f);
 
+        // m_debug = BGFX_DEBUG_STATS;
         bgfx::setDebug(m_debug);
 
         // Set view 0 clear state.
@@ -722,7 +723,6 @@ switch (bgfx::getRendererType())
 
     virtual int shutdown() override
     {
-        // Shutdown bgfx.
         bgfx::shutdown();
         return 0;
     }
@@ -735,7 +735,6 @@ switch (bgfx::getRendererType())
 
         if (!entry::processEvents(m_width, m_height, m_debug, m_reset) )
         {
-
             bgfx::setViewClear(0
             , BGFX_CLEAR_COLOR|BGFX_CLEAR_DEPTH
             , clearColor
@@ -743,16 +742,8 @@ switch (bgfx::getRendererType())
             , 0
             );
 
-
-            // Set view 0 default viewport.
             bgfx::setViewRect(0, 0, 0, uint16_t(m_width), uint16_t(m_height) );
-
-            // This dummy draw call is here to make sure that view 0 is cleared
-            // if no other draw calls are submitted to view 0.
             bgfx::touch(0);
-
-            // Advance to next frame. Rendering thread will be kicked to
-            // process submitted rendering primitives.
             bgfx::frame();
 
             return true;
