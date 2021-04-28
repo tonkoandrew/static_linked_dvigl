@@ -47,7 +47,7 @@ namespace entry
 			Exit,
 			Size,
 			Window,
-			Suspend,
+			// Suspend,
 		};
 
 		Event(Enum _type)
@@ -81,12 +81,12 @@ namespace entry
 		void* m_nwh;
 	};
 
-	struct SuspendEvent : public Event
-	{
-		ENTRY_IMPLEMENT_EVENT(SuspendEvent, Event::Suspend);
+	// struct SuspendEvent : public Event
+	// {
+	// 	ENTRY_IMPLEMENT_EVENT(SuspendEvent, Event::Suspend);
 
-		Suspend::Enum m_state;
-	};
+	// 	Suspend::Enum m_state;
+	// };
 
 
 	const Event* poll();
@@ -129,12 +129,12 @@ namespace entry
 			m_queue.push(ev);
 		}
 
-		void postSuspendEvent(WindowHandle _handle, Suspend::Enum _state)
-		{
-			SuspendEvent* ev = BX_NEW(getAllocator(), SuspendEvent)(_handle);
-			ev->m_state = _state;
-			m_queue.push(ev);
-		}
+		// void postSuspendEvent(WindowHandle _handle, Suspend::Enum _state)
+		// {
+		// 	SuspendEvent* ev = BX_NEW(getAllocator(), SuspendEvent)(_handle);
+		// 	ev->m_state = _state;
+		// 	m_queue.push(ev);
+		// }
 
 
 		const Event* poll()

@@ -22,18 +22,18 @@ namespace entry
 	struct WindowHandle  { uint16_t idx; };
 	inline bool isValid(WindowHandle _handle)  { return UINT16_MAX != _handle.idx; }
 
-	struct Suspend
-	{
-		enum Enum
-		{
-			WillSuspend,
-			DidSuspend,
-			WillResume,
-			DidResume,
+	// struct Suspend
+	// {
+	// 	enum Enum
+	// 	{
+	// 		WillSuspend,
+	// 		DidSuspend,
+	// 		WillResume,
+	// 		DidResume,
 
-			Count
-		};
-	};
+	// 		Count
+	// 	};
+	// };
 
 	bool processEvents(uint32_t& _width, uint32_t& _height, uint32_t& _debug, uint32_t& _reset);
 
