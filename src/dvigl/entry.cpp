@@ -4,7 +4,7 @@
 #include "entry_p.h"
 
 
-extern "C" int32_t _main_();
+int32_t _main_();
 
 namespace entry
 {

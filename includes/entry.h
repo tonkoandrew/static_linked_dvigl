@@ -26,9 +26,6 @@ namespace entry
 
 	bx::AllocatorI*  getAllocator();
 
-	WindowHandle createWindow(int32_t _x, int32_t _y, uint32_t _width, uint32_t _height, uint32_t _flags = ENTRY_WINDOW_FLAG_NONE, const char* _title = "");
-	void destroyWindow(WindowHandle _handle);
-
 	struct WindowState
 	{
 		WindowState()
@@ -42,8 +39,6 @@ namespace entry
 		uint32_t     m_width;
 		uint32_t     m_height;
 	};
-
-	bool processWindowEvents(WindowState& _state, uint32_t& _debug, uint32_t& _reset);
 
 	class BX_NO_VTABLE AppI
 	{

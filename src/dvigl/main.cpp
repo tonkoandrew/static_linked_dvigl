@@ -654,7 +654,7 @@ public:
     {
         m_width  = _width;
         m_height = _height;
-        m_reset  = BGFX_RESET_VSYNC;
+        m_reset  = BGFX_RESET_VSYNC | BGFX_RESET_MSAA_X16 | BGFX_RESET_MAXANISOTROPY ;
 
         bgfx::Init init;
         // TODO: read from saved user config
