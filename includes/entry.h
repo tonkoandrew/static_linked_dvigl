@@ -28,16 +28,12 @@ namespace entry
 
 	WindowHandle createWindow(int32_t _x, int32_t _y, uint32_t _width, uint32_t _height, uint32_t _flags = ENTRY_WINDOW_FLAG_NONE, const char* _title = "");
 	void destroyWindow(WindowHandle _handle);
-	void setWindowSize(WindowHandle _handle, uint32_t _width, uint32_t _height);
-	void setWindowTitle(WindowHandle _handle, const char* _title);
-	void setWindowFlags(WindowHandle _handle, uint32_t _flags, bool _enabled);
 
 	struct WindowState
 	{
 		WindowState()
 			: m_width(0)
 			, m_height(0)
-			, m_nwh(NULL)
 		{
 			m_handle.idx = UINT16_MAX;
 		}
@@ -45,7 +41,6 @@ namespace entry
 		WindowHandle m_handle;
 		uint32_t     m_width;
 		uint32_t     m_height;
-		void*        m_nwh;
 	};
 
 	bool processWindowEvents(WindowState& _state, uint32_t& _debug, uint32_t& _reset);

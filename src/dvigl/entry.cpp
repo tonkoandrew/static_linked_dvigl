@@ -12,12 +12,10 @@ namespace entry
 	static uint32_t s_reset = BGFX_RESET_NONE;
 	static uint32_t s_width = ENTRY_DEFAULT_WIDTH;
 	static uint32_t s_height = ENTRY_DEFAULT_HEIGHT;
-	static bool s_exit = false;
 
 	extern bx::AllocatorI* getDefaultAllocator();
 	bx::AllocatorI* g_allocator = getDefaultAllocator();
 
-#if ENTRY_CONFIG_IMPLEMENT_DEFAULT_ALLOCATOR
 	bx::AllocatorI* getDefaultAllocator()
 	{
 BX_PRAGMA_DIAGNOSTIC_PUSH();
@@ -27,7 +25,6 @@ BX_PRAGMA_DIAGNOSTIC_IGNORED_CLANG_GCC("-Wshadow");
 		return &s_allocator;
 BX_PRAGMA_DIAGNOSTIC_POP();
 	}
-#endif // ENTRY_CONFIG_IMPLEMENT_DEFAULT_ALLOCATOR
  
 	static AppI*    s_currentApp = NULL;
 	static AppI*    s_apps       = NULL;
@@ -48,7 +45,7 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 		bgfx::frame();
 
 		WindowHandle defaultWindow = { 0 };
-		setWindowSize(defaultWindow, s_width, s_height);
+		// setWindowSize(defaultWindow, s_width, s_height);
 		while (_app->update() )
 		{
 		}
@@ -58,7 +55,7 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 	int main()
 	{
 		entry::WindowHandle defaultWindow = { 0 };
-		setWindowSize(defaultWindow, ENTRY_DEFAULT_WIDTH, ENTRY_DEFAULT_HEIGHT);
+		// setWindowSize(defaultWindow, ENTRY_DEFAULT_WIDTH, ENTRY_DEFAULT_HEIGHT);
 
 		int32_t result = bx::kExitSuccess;
 		result = ::_main_();
@@ -126,7 +123,7 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 		s_width = _width;
 		s_height = _height;
 
-		return s_exit;
+		return false;
 	}
 
 	bx::AllocatorI* getAllocator()

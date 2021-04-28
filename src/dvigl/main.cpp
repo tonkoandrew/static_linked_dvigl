@@ -448,7 +448,7 @@ namespace entry
 
             // Force window resolution...
             WindowHandle defaultWindow = { 0 };
-            setWindowSize(defaultWindow, m_width, m_height, true);
+            // setWindowSize(defaultWindow, m_width, m_height, true);
 
             bool exit = false;
             SDL_Event event;
@@ -478,18 +478,18 @@ namespace entry
                                 }
                                 break;
 
-                            case SDL_WINDOWEVENT_SHOWN:
-                            case SDL_WINDOWEVENT_HIDDEN:
-                            case SDL_WINDOWEVENT_EXPOSED:
-                            case SDL_WINDOWEVENT_MOVED:
-                            case SDL_WINDOWEVENT_MINIMIZED:
-                            case SDL_WINDOWEVENT_MAXIMIZED:
-                            case SDL_WINDOWEVENT_RESTORED:
-                            case SDL_WINDOWEVENT_ENTER:
-                            case SDL_WINDOWEVENT_LEAVE:
-                            case SDL_WINDOWEVENT_FOCUS_GAINED:
-                            case SDL_WINDOWEVENT_FOCUS_LOST:
-                                break;
+                            // case SDL_WINDOWEVENT_SHOWN:
+                            // case SDL_WINDOWEVENT_HIDDEN:
+                            // case SDL_WINDOWEVENT_EXPOSED:
+                            // case SDL_WINDOWEVENT_MOVED:
+                            // case SDL_WINDOWEVENT_MINIMIZED:
+                            // case SDL_WINDOWEVENT_MAXIMIZED:
+                            // case SDL_WINDOWEVENT_RESTORED:
+                            // case SDL_WINDOWEVENT_ENTER:
+                            // case SDL_WINDOWEVENT_LEAVE:
+                            // case SDL_WINDOWEVENT_FOCUS_GAINED:
+                            // case SDL_WINDOWEVENT_FOCUS_LOST:
+                            //     break;
 
                             case SDL_WINDOWEVENT_CLOSE:
                                 {
@@ -507,28 +507,15 @@ namespace entry
 
 
                     default:
-                        {
-                            const SDL_UserEvent& uev = event.user;
-                            switch (uev.type - s_userEventStart)
-                            {
-
-                            case SDL_USER_WINDOW_SET_SIZE:
-                                {
-                                    WindowHandle handle = getWindowHandle(uev);
-                                    Msg* msg = (Msg*)uev.data2;
-                                    if (isValid(handle) )
-                                    {
-                                        setWindowSize(handle, msg->m_width, msg->m_height);
-                                    }
-                                    delete msg;
-                                }
-                                break;
-                            default:
-                                break;
-                            }
-                        }
                         break;
                     }
+                }
+
+                auto keystates = SDL_GetKeyboardState(NULL);
+                if (keystates[SDL_SCANCODE_AC_HOME] || keystates[SDL_SCANCODE_Q])
+                {
+                    m_eventQueue.postExitEvent();
+                    exit = true;
                 }
             }
 
@@ -612,14 +599,14 @@ namespace entry
         s_ctx.m_eventQueue.release(_event);
     }
 
-    void setWindowSize(WindowHandle _handle, uint32_t _width, uint32_t _height)
-    {
-        Msg* msg = new Msg;
-        msg->m_width  = _width;
-        msg->m_height = _height;
+    // void setWindowSize(WindowHandle _handle, uint32_t _width, uint32_t _height)
+    // {
+    //     Msg* msg = new Msg;
+    //     msg->m_width  = _width;
+    //     msg->m_height = _height;
 
-        sdlPostEvent(SDL_USER_WINDOW_SET_SIZE, _handle, msg);
-    }
+    //     sdlPostEvent(SDL_USER_WINDOW_SET_SIZE, _handle, msg);
+    // }
 
     int32_t MainThreadEntry::threadFunc(bx::Thread* _thread, void* _userData)
     {
@@ -709,7 +696,7 @@ switch (bgfx::getRendererType())
     spdlog::critical("test critical");
     spdlog::error("test error {}, {:.2f}", 42, 42.0f);
 
-        // m_debug = BGFX_DEBUG_STATS;
+        m_debug = BGFX_DEBUG_STATS;
         bgfx::setDebug(m_debug);
 
         // Set view 0 clear state.
@@ -743,6 +730,7 @@ switch (bgfx::getRendererType())
             );
 
             bgfx::setViewRect(0, 0, 0, uint16_t(m_width), uint16_t(m_height) );
+        // bgfx::dbgTextClear();
             bgfx::touch(0);
             bgfx::frame();
 
