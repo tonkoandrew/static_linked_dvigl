@@ -290,6 +290,15 @@ namespace entry
                 }
             }
 
+            if (cmdLine.hasArg("help") )
+            {
+                spdlog::info("OpenGL: --gl");
+                spdlog::info("Vulkan: --vk");
+                spdlog::info("DirectX 9: --d3d9");
+                spdlog::info("DirectX 11: --d3d11");
+                spdlog::info("DirectX 12: --d3d12");
+                spdlog::info("Metal: --mtl");
+            }
             spdlog::info("Starting BGFX");
             spdlog::info("Compiler:" BX_COMPILER_NAME " / " BX_CPU_NAME "-" BX_ARCH_NAME " / " BX_PLATFORM_NAME);
 
@@ -354,37 +363,37 @@ namespace entry
 
     // TTF_CloseFont(f);
     // ========================== EnTT and glm ================================
-    struct TransformComponent
-    {
-        glm::mat4 Transform;
-        TransformComponent() = default;
-        TransformComponent(const TransformComponent&) = default;
-        TransformComponent(const glm::mat4& transform) : Transform(transform) {}
-        operator glm::mat4&() { return Transform; }
-        operator const glm::mat4&() const { return Transform; }
-    };
+    // struct TransformComponent
+    // {
+    //     glm::mat4 Transform;
+    //     TransformComponent() = default;
+    //     TransformComponent(const TransformComponent&) = default;
+    //     TransformComponent(const glm::mat4& transform) : Transform(transform) {}
+    //     operator glm::mat4&() { return Transform; }
+    //     operator const glm::mat4&() const { return Transform; }
+    // };
 
-    struct MeshComponent
-    {
-        int mesh_id;
-        MeshComponent() = default;
-        MeshComponent(const MeshComponent&) = default;
-        MeshComponent(const int id) : mesh_id(id) {}
-    };
+    // struct MeshComponent
+    // {
+    //     int mesh_id;
+    //     MeshComponent() = default;
+    //     MeshComponent(const MeshComponent&) = default;
+    //     MeshComponent(const int id) : mesh_id(id) {}
+    // };
 
-    TransformComponent transform;
-    MeshComponent mc;
+    // TransformComponent transform;
+    // MeshComponent mc;
 
-    entt::registry m_Registry;
-    entt::entity entity = m_Registry.create();
-    auto transf = m_Registry.emplace<TransformComponent>(entity, glm::mat4(1.0f));
-    auto x = m_Registry.emplace<MeshComponent>(entity, mc);
-    auto v = m_Registry.view<TransformComponent, MeshComponent>();
-    for (auto entity: v)
-    {
-        auto [ttt, mmm] = v.get<TransformComponent, MeshComponent>(entity);
-        spdlog::debug("Entity: {}, transform: {}, mesh_id: {}", (int) entity, glm::to_string(ttt.Transform).c_str(), (int) mmm.mesh_id);
-    }
+    // entt::registry m_Registry;
+    // entt::entity entity = m_Registry.create();
+    // auto transf = m_Registry.emplace<TransformComponent>(entity, glm::mat4(1.0f));
+    // auto x = m_Registry.emplace<MeshComponent>(entity, mc);
+    // auto v = m_Registry.view<TransformComponent, MeshComponent>();
+    // for (auto entity: v)
+    // {
+    //     auto [ttt, mmm] = v.get<TransformComponent, MeshComponent>(entity);
+    //     spdlog::debug("Entity: {}, transform: {}, mesh_id: {}", (int) entity, glm::to_string(ttt.Transform).c_str(), (int) mmm.mesh_id);
+    // }
  //    // ============================= OZZ ==================================================
 
     tinystl::string skeleton = "../res/models/skeleton.ozz";
@@ -666,13 +675,16 @@ switch (bgfx::getRendererType())
         m_debug = BGFX_DEBUG_STATS;
         bgfx::setDebug(m_debug);
 
-        // Set view 0 clear state.
+
         bgfx::setViewClear(0
-            , BGFX_CLEAR_COLOR|BGFX_CLEAR_DEPTH
-            , 0x303030ff
-            , 1.0f
-            , 0
-            );
+        , BGFX_CLEAR_COLOR|BGFX_CLEAR_DEPTH
+        , 0x000000ff
+        , 1.0f
+        , 0
+        );
+        bgfx::setViewRect(0, 0, 0, uint16_t(m_width), uint16_t(m_height) );
+        bgfx::touch(0);
+        bgfx::frame();
     }
 
     virtual int shutdown() override
@@ -683,21 +695,16 @@ switch (bgfx::getRendererType())
 
     bool update() override
     {
-        static int clearColor = 0x303030ff;
-        clearColor += 1024 + 256;
-
-
         if (!entry::processEvents(m_width, m_height, m_reset) )
         {
             bgfx::setViewClear(0
             , BGFX_CLEAR_COLOR|BGFX_CLEAR_DEPTH
-            , clearColor
+            , 0x000000ff
             , 1.0f
             , 0
             );
 
             bgfx::setViewRect(0, 0, 0, uint16_t(m_width), uint16_t(m_height) );
-        // bgfx::dbgTextClear();
             bgfx::touch(0);
             bgfx::frame();
 
