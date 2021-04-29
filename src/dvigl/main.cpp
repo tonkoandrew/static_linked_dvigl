@@ -625,10 +625,10 @@ extern "C" {
 namespace
 {
 
-class ExampleHelloWorld : public entry::AppI
+class Application : public entry::AppI
 {
 public:
-    ExampleHelloWorld() : entry::AppI() {}
+    Application() : entry::AppI() {}
 
     void init(uint32_t _width, uint32_t _height) override
     {
@@ -725,6 +725,6 @@ switch (bgfx::getRendererType())
 int _main_()
 {
     spdlog::set_level(spdlog::level::debug);
-    ExampleHelloWorld app;
+    Application app;
     return entry::runApp(&app);
 }
