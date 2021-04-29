@@ -53,9 +53,9 @@ set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS}
 )
 # ===================== SDL2 net =========================================
 find_package(sdl2-net CONFIG REQUIRED)
-set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
-    SDL2::SDL2_net
-)
+# set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
+#     SDL2::SDL2_net
+# )
 set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
     SDL2::SDL2_net
 )
@@ -66,9 +66,9 @@ set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS}
 )
 # ===================== SDL2 ttf =========================================
 find_package(sdl2-ttf CONFIG REQUIRED)
-set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
-    SDL2::SDL2_ttf
-)
+# set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
+#     SDL2::SDL2_ttf
+# )
 set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
     SDL2::SDL2_ttf
 )
@@ -98,9 +98,9 @@ set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS}
 )
 # ===================== SDL2 mixer =======================================
 find_package(sdl2-mixer CONFIG REQUIRED)
-set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
-    SDL2::SDL2_mixer
-)
+# set(DVIGL_RUNTIME_LIBS ${DVIGL_RUNTIME_LIBS} 
+#     SDL2::SDL2_mixer
+# )
 set(DVIGL_EDITOR_LIBS ${DVIGL_EDITOR_LIBS} 
     SDL2::SDL2_mixer
 )

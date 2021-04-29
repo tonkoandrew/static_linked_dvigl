@@ -32,8 +32,8 @@ BX_PRAGMA_DIAGNOSTIC_POP()
 
 #include "SDL_net.h"
 // #include "SDL_image.h"
-#include "SDL_mixer.h"
-#include "SDL_ttf.h"
+// #include "SDL_mixer.h"
+// #include "SDL_ttf.h"
 #include <entt/entt.hpp>
 
 #define GLM_FORCE_RADIANS
@@ -236,7 +236,6 @@ namespace entry
             , m_y(0)
             , m_width(0)
             , m_height(0)
-            , m_flags(0)
         {
         }
 
@@ -244,7 +243,6 @@ namespace entry
         int32_t  m_y;
         uint32_t m_width;
         uint32_t m_height;
-        uint32_t m_flags;
     };
 
     static uint32_t s_userEventStart;
@@ -292,8 +290,11 @@ namespace entry
             spdlog::set_level(spdlog::level::debug);
         }
 
-        int run()
+        int run(int argc, char const *argv[])
         {
+            for (int i=0; i < argc; i++){
+                spdlog::info("argc {0} argv {1}", i, argv[i]);
+            }
             spdlog::info("Starting BGFX");
             spdlog::info("Compiler:" BX_COMPILER_NAME " / " BX_CPU_NAME "-" BX_ARCH_NAME " / " BX_PLATFORM_NAME);
 
@@ -432,12 +433,6 @@ namespace entry
 
             // SDL_Surface* icon = IMG_Load("../res/icons/icon.png");
             // SDL_SetWindowIcon(m_window, icon);
-
-
-            m_flags = 0
-                | ENTRY_WINDOW_FLAG_ASPECT_RATIO
-                | ENTRY_WINDOW_FLAG_FRAME
-                ;
 
             s_userEventStart = SDL_RegisterEvents(7);
 
@@ -579,12 +574,11 @@ namespace entry
 
         bx::HandleAllocT<ENTRY_CONFIG_MAX_WINDOWS> m_windowAlloc;
         SDL_Window* m_window;
-        uint32_t m_flags;
 
         uint32_t m_width;
         uint32_t m_height;
 
-        Mix_Music* music;
+        // Mix_Music* music;
     };
 
     static Context s_ctx;
@@ -634,13 +628,13 @@ namespace entry
 
 
 
-
-__declspec(dllexport) int dvigl_init(int _argc, char const *_argv[])
-{
-    using namespace entry;
-    return s_ctx.run();
+extern "C" {
+    __declspec(dllexport) int dvigl_init(int _argc, char const *_argv[])
+    {
+        using namespace entry;
+        return s_ctx.run(_argc, _argv);
+    }
 }
-
 
 namespace
 {

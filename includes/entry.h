@@ -10,11 +10,7 @@
 
 namespace bx { struct AllocatorI; }
 
-extern "C" int _main_();
-
-#define ENTRY_WINDOW_FLAG_NONE         UINT32_C(0x00000000)
-#define ENTRY_WINDOW_FLAG_ASPECT_RATIO UINT32_C(0x00000001)
-#define ENTRY_WINDOW_FLAG_FRAME        UINT32_C(0x00000002)
+int _main_();
 
 
 namespace entry
