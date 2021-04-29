@@ -8,7 +8,6 @@ int32_t _main_();
 
 namespace entry
 {
-	static uint32_t s_debug = BGFX_DEBUG_NONE;
 	static uint32_t s_reset = BGFX_RESET_NONE;
 	static uint32_t s_width = ENTRY_DEFAULT_WIDTH;
 	static uint32_t s_height = ENTRY_DEFAULT_HEIGHT;
@@ -26,13 +25,8 @@ BX_PRAGMA_DIAGNOSTIC_IGNORED_CLANG_GCC("-Wshadow");
 BX_PRAGMA_DIAGNOSTIC_POP();
 	}
  
-	static AppI*    s_currentApp = NULL;
-	static AppI*    s_apps       = NULL;
-	static uint32_t s_numApps    = 0;
-
 	AppI::AppI()
 	{
-		s_apps = this;
 	}
 
 	AppI::~AppI()
@@ -44,8 +38,6 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 		_app->init(s_width, s_height);
 		bgfx::frame();
 
-		WindowHandle defaultWindow = { 0 };
-		// setWindowSize(defaultWindow, s_width, s_height);
 		while (_app->update() )
 		{
 		}
@@ -54,22 +46,15 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 
 	int main()
 	{
-		entry::WindowHandle defaultWindow = { 0 };
-		// setWindowSize(defaultWindow, ENTRY_DEFAULT_WIDTH, ENTRY_DEFAULT_HEIGHT);
-
-		int32_t result = bx::kExitSuccess;
-		result = ::_main_();
-
-		return result;
+		return _main_();
 	}
 
 	WindowState s_window;
 
-	bool processEvents(uint32_t& _width, uint32_t& _height, uint32_t& _debug, uint32_t& _reset)
+	bool processEvents(uint32_t& _width, uint32_t& _height, uint32_t& _reset)
 	{
 		bool needReset = s_reset != _reset;
 
-		s_debug = _debug;
 		s_reset = _reset;
 
 		WindowHandle handle = { UINT16_MAX };
@@ -117,8 +102,6 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 			_reset = s_reset;
 			bgfx::reset(_width, _height, _reset);
 		}
-
-		_debug = s_debug;
 
 		s_width = _width;
 		s_height = _height;

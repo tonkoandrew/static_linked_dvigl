@@ -18,7 +18,7 @@ namespace entry
 	struct WindowHandle  { uint16_t idx; };
 	inline bool isValid(WindowHandle _handle)  { return UINT16_MAX != _handle.idx; }
 
-	bool processEvents(uint32_t& _width, uint32_t& _height, uint32_t& _debug, uint32_t& _reset);
+	bool processEvents(uint32_t& _width, uint32_t& _height, uint32_t& _reset);
 
 	bx::AllocatorI*  getAllocator();
 

@@ -80,21 +80,21 @@ BX_PRAGMA_DIAGNOSTIC_POP()
 
 
 
-template <>
-struct fmt::formatter<tinystl::string>
-{
-    constexpr auto parse(format_parse_context& ctx)
-    {
-        auto it = ctx.begin(), end = ctx.end();
-        while (it != end)
-            *it++;
-        return it;
-    }
-    template <typename FormatContext> auto format(const tinystl::string& p, FormatContext& ctx)
-    {
-        return format_to(ctx.out(), "\"{}\"", p.c_str());
-    }
-};
+// template <>
+// struct fmt::formatter<tinystl::string>
+// {
+//     constexpr auto parse(format_parse_context& ctx)
+//     {
+//         auto it = ctx.begin(), end = ctx.end();
+//         while (it != end)
+//             *it++;
+//         return it;
+//     }
+//     template <typename FormatContext> auto format(const tinystl::string& p, FormatContext& ctx)
+//     {
+//         return format_to(ctx.out(), "\"{}\"", p.c_str());
+//     }
+// };
 
 
 // bool LoadSkeleton(const char* _filename, ozz::animation::Skeleton* _skeleton)
@@ -224,55 +224,12 @@ namespace entry
         SDL_DestroyWindow(_window);
     }
 
+
     struct MainThreadEntry
     {
         static int32_t threadFunc(bx::Thread* _thread, void* _userData);
     };
 
-    struct Msg
-    {
-        Msg()
-            : m_x(0)
-            , m_y(0)
-            , m_width(0)
-            , m_height(0)
-        {
-        }
-
-        int32_t  m_x;
-        int32_t  m_y;
-        uint32_t m_width;
-        uint32_t m_height;
-    };
-
-    static uint32_t s_userEventStart;
-
-    enum SDL_USER_WINDOW
-    {
-        SDL_USER_WINDOW_DESTROY,
-
-        SDL_USER_WINDOW_SET_FLAGS,
-        SDL_USER_WINDOW_SET_POS,
-        SDL_USER_WINDOW_SET_SIZE,
-        SDL_USER_WINDOW_TOGGLE_FRAME,
-        SDL_USER_WINDOW_TOGGLE_FULL_SCREEN,
-        // SDL_USER_WINDOW_MOUSE_LOCK,
-    };
-
-    static void sdlPostEvent(SDL_USER_WINDOW _type, WindowHandle _handle, Msg* _msg = NULL, uint32_t _code = 0)
-    {
-        SDL_Event event;
-        SDL_UserEvent& uev = event.user;
-        uev.type = s_userEventStart + _type;
-
-        union { void* p; WindowHandle h; } cast;
-        cast.h = _handle;
-        uev.data1 = cast.p;
-
-        uev.data2 = _msg;
-        uev.code = _code;
-        SDL_PushEvent(&event);
-    }
 
     static WindowHandle getWindowHandle(const SDL_UserEvent& _uev)
     {
@@ -280,6 +237,7 @@ namespace entry
         cast.p = _uev.data1;
         return cast.h;
     }
+
 
     struct Context
     {
@@ -431,19 +389,10 @@ namespace entry
                             | SDL_WINDOW_RESIZABLE
                             );
 
-            // SDL_Surface* icon = IMG_Load("../res/icons/icon.png");
-            // SDL_SetWindowIcon(m_window, icon);
-
-            s_userEventStart = SDL_RegisterEvents(7);
-
             sdlSetWindow(m_window);
             bgfx::renderFrame();
 
             m_thread.init(MainThreadEntry::threadFunc, &m_mte);
-
-            // Force window resolution...
-            WindowHandle defaultWindow = { 0 };
-            // setWindowSize(defaultWindow, m_width, m_height, true);
 
             bool exit = false;
             SDL_Event event;
@@ -593,15 +542,6 @@ namespace entry
         s_ctx.m_eventQueue.release(_event);
     }
 
-    // void setWindowSize(WindowHandle _handle, uint32_t _width, uint32_t _height)
-    // {
-    //     Msg* msg = new Msg;
-    //     msg->m_width  = _width;
-    //     msg->m_height = _height;
-
-    //     sdlPostEvent(SDL_USER_WINDOW_SET_SIZE, _handle, msg);
-    // }
-
     int32_t MainThreadEntry::threadFunc(bx::Thread* _thread, void* _userData)
     {
         BX_UNUSED(_thread);
@@ -714,7 +654,7 @@ switch (bgfx::getRendererType())
         clearColor += 1024 + 256;
 
 
-        if (!entry::processEvents(m_width, m_height, m_debug, m_reset) )
+        if (!entry::processEvents(m_width, m_height, m_reset) )
         {
             bgfx::setViewClear(0
             , BGFX_CLEAR_COLOR|BGFX_CLEAR_DEPTH
