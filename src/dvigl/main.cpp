@@ -25,6 +25,8 @@ BX_PRAGMA_DIAGNOSTIC_POP()
 
 #include <bx/thread.h>
 #include <bx/handlealloc.h>
+#include <bx/commandline.h>
+
 // #include <tinystl/allocator.h>
 #include <tinystl/string.h>
 
@@ -139,6 +141,7 @@ BX_PRAGMA_DIAGNOSTIC_POP()
 //     return true;
 // }
 
+bgfx::RendererType::Enum m_type;
 
 namespace entry
 {
@@ -250,9 +253,43 @@ namespace entry
 
         int run(int argc, char const *argv[])
         {
-            for (int i=0; i < argc; i++){
-                spdlog::info("argc {0} argv {1}", i, argv[i]);
+
+            bx::CommandLine cmdLine(argc, (const char**)argv);
+
+            m_type = bgfx::RendererType::Vulkan;
+
+            if (cmdLine.hasArg("gl") )
+            {
+                m_type = bgfx::RendererType::OpenGL;
             }
+            else if (cmdLine.hasArg("vk") )
+            {
+                m_type = bgfx::RendererType::Vulkan;
+            }
+            else if (cmdLine.hasArg("noop") )
+            {
+                m_type = bgfx::RendererType::Noop;
+            }
+            else if (cmdLine.hasArg("d3d9") )
+            {
+                m_type = bgfx::RendererType::Direct3D9;
+            }
+            else if (cmdLine.hasArg("d3d11") )
+            {
+                m_type = bgfx::RendererType::Direct3D11;
+            }
+            else if (cmdLine.hasArg("d3d12") )
+            {
+                m_type = bgfx::RendererType::Direct3D12;
+            }
+            else if (BX_ENABLED(BX_PLATFORM_OSX) )
+            {
+                if (cmdLine.hasArg("mtl") )
+                {
+                    m_type = bgfx::RendererType::Metal;
+                }
+            }
+
             spdlog::info("Starting BGFX");
             spdlog::info("Compiler:" BX_COMPILER_NAME " / " BX_CPU_NAME "-" BX_ARCH_NAME " / " BX_PLATFORM_NAME);
 
@@ -592,11 +629,7 @@ public:
 
         bgfx::Init init;
         // TODO: read from saved user config
-        // init.type     = bgfx::RendererType::Direct3D9;
-        // init.type     = bgfx::RendererType::Direct3D11;
-        init.type     = bgfx::RendererType::Direct3D12;
-        // init.type     = bgfx::RendererType::OpenGL;
-        // init.type     = bgfx::RendererType::Vulkan;
+        init.type     = m_type;
         // init.vendorId = args.m_pciId;
         init.resolution.width  = m_width;
         init.resolution.height = m_height;
